@@ -8,5 +8,5 @@ module.exports = (app) => {
   app.get('/users', userController.validateUserPermition, userController.findAll)
   app.put('/users/:id', userController.validateUserPermition, userController.update, auditController.createEvent)
   app.get('/users/:id', userController.validateUserPermition, userController.find)
-  app.delete('/users/:id', userController.validateUserPermition, userController.delete)
+  app.delete('/users/:id', userController.validateUserPermition, userController.delete, auditController.createEvent)
 }

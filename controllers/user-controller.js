@@ -72,10 +72,14 @@ class UserController {
     res.status(this.OK_STATUS).send(user.responseObject())
   }
 
-  delete (req, res) {
-    const response = User.destroy({where:{id: req.params.id}})
-    UserRole.destroy({where:{user_id: req.params.id}})
-    res.status(this.OK_STATUS).send({message: 'User removed'})
+  async delete (req, res, next) {
+    const user = await User.findById(req.params.id)  
+    await User.destroy({where:{id: req.params.id}})
+    await UserRole.destroy({where:{user_id: req.params.id}})
+    req.body.auditEventObject =this.createAuditEventObject (this.DELETE_ACTION, user)
+    req.body.responseStatus = this.OK_STATUS
+    req.body.responseObject = {message: 'User removed'}
+    next()
   }
 
   async createRoles (req, user_id) {
