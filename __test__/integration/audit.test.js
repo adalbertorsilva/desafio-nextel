@@ -17,7 +17,7 @@ describe('Authentication', () => {
 
         const response = await request(app).post('/users').send(userPayload).set('Authorization', userToken)
 
-        expect(response.status).toBe(201)
+        expect(response.status).toBe(200)
 
         const auditEvents = await AuditEvent.findAll({where:{entity_id: response.body.id}})
 

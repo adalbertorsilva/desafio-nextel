@@ -3,17 +3,13 @@ const User = require('../models').User
 const Role = require('../models').Role
 const UserRole = require('../models').UserRole
 const autoBind = require('auto-bind')
+const BaseController = require('./base-controller')
 
-class UserController {
-  
+class UserController extends BaseController {
+
   constructor () {
-    autoBind(this)
-    this.CREATED_STATUS = 201
-    this.OK_STATUS = 200
-    this.ACTION_FORBIDDEN_STATUS = 403
-    this.CREATE_ACTION = 'CREATE'
-    this.UPDATE_ACTION = 'UPDATE'
-    this.DELETE_ACTION = 'DELETE'
+    super()
+    this.ENTITY = 'USER'
   }
 
   validateUserPermition (req, res, next) {
@@ -32,9 +28,7 @@ class UserController {
     const roles = await this.createRoles(req, userResponse.id)
     userResponse.roles = roles.map(role => role.responseObject())
 
-    req.body.auditEventObject =this.createAuditEventObject (this.CREATE_ACTION, userResponse)
-    req.body.responseStatus = this.CREATED_STATUS
-    req.body.responseObject = userResponse.responseObject()
+    this.configRequestBypass(req, userResponse)
     next()
   }
 
@@ -59,10 +53,7 @@ class UserController {
     })
 
     updatedUser[1].roles = roles.map(role => role.responseObject())
-
-    req.body.auditEventObject =this.createAuditEventObject (this.UPDATE_ACTION, updatedUser[1])
-    req.body.responseStatus = this.OK_STATUS
-    req.body.responseObject = updatedUser[1].responseObject()
+    this.configRequestBypass(req, updatedUser[1])
     next()
   }
 
@@ -76,13 +67,13 @@ class UserController {
     const user = await User.findById(req.params.id)  
     await User.destroy({where:{id: req.params.id}})
     await UserRole.destroy({where:{user_id: req.params.id}})
-    req.body.auditEventObject =this.createAuditEventObject (this.DELETE_ACTION, user)
-    req.body.responseStatus = this.OK_STATUS
-    req.body.responseObject = {message: 'User removed'}
+
+    this.configRequestBypass(req, user, {message: 'User removed'})
     next()
   }
 
   async createRoles (req, user_id) {
+
     const lowerCaseParams = req.body.roles.map(role => role.toLowerCase())
     const roles = await Role.findAll()
     const filteredRoles = roles.filter(role => 
@@ -96,15 +87,6 @@ class UserController {
     await UserRole.bulkCreate(userRoles)
 
     return filteredRoles
-  }
-
-  createAuditEventObject (action, user) {
-    return {
-        entity: 'User',
-        entity_id: user.id,
-        username: this.requestUser.username,
-        action
-      }
   }
 }
 

@@ -28,7 +28,7 @@ describe('User', () => {
         expect(response.body).toHaveProperty('message', "User doesn't have permition do this action")
     })
 
-    it('Must return an 201 status and a fulfiled object if user is Admin ', async () =>{
+    it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
       
       const adminUser =  await User.create({username:'adminuser', password:'standardpswd'})
       await UserRole.create({user_id: adminUser.id, role_id: adminRole.id})
@@ -37,7 +37,7 @@ describe('User', () => {
 
       const response = await request(app).post('/users').send(userPayload).set('Authorization', userToken)
 
-      expect(response.status).toBe(201)
+      expect(response.status).toBe(200)
       expect(response.body).toHaveProperty('id')
       expect(response.body.id).not.toBeNull()
       expect(response.body).toHaveProperty('username', userPayload.username)
