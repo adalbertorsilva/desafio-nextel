@@ -6,7 +6,7 @@
   "scripts": {
     "test": "NODE_ENV=test sequelize db:migrate; jest --forceExit --verbose",
     "start-dev": "nodemon /bin/server.js",
-    "start": "node /bin/server.js"
+    "start": "node bin/server.js"
   },
   "keywords": [
     "super",

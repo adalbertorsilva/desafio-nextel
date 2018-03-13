@@ -2,6 +2,8 @@
 
 const {Model, DataTypes} = require('sequelize')
 const bcrypt = require('bcrypt-nodejs')
+const autoBind = require('auto-bind')
+const Role = require('./role')
 
 module.exports = (sequelize) => {
   class User extends Model {
@@ -12,17 +14,37 @@ module.exports = (sequelize) => {
       }, {sequelize, underscored: true})
     }
 
-    generatePasswordHash () {
+    generatePasswordHash (password) {
       const salt = bcrypt.genSaltSync()
-      this.password = bcrypt.hashSync(this.password, salt)
+      return bcrypt.hashSync(password, salt)
     }
 
     validatePassword (password) {
       return bcrypt.compareSync(password, this.password)
     }
 
-    static associate (models) {
+    isAdmin () {
+     const isAdmin = this.roles.find(role => role.name === 'Admin')
+     return isAdmin ? true : false
+    }
 
+    responseObject () {
+      const responseObject = {
+        id: this.id,
+        username: this.username,
+        password: this.password,
+        roles: this.roles
+      }
+
+      return responseObject
+    }
+
+    static associate (models) {
+      this.belongsToMany(models.Role, {
+        through: 'UserRole',
+        onDelete: 'CASCADE',
+        as: 'roles'
+      })
     }
   }
 

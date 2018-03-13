@@ -10,4 +10,11 @@ describe('Authentication', () => {
       expect(response.body.token).not.toBeNull()
     })
   })
+
+  describe('Test user token validation', () => {
+    it('Must return a 403 status if token is not valid', async () =>{
+      const response = await request(app).get('/users')
+      expect(response.status).toBe(403)
+    })
+  })
 })

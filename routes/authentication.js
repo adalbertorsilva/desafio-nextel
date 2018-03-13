@@ -3,4 +3,5 @@ const authenticationController = new AuthenticationController()
 
 module.exports = (app) => {
   app.get('/authenticate', authenticationController.handleAuthentication)
+  app.use(authenticationController.handleTokenValidation)
 }

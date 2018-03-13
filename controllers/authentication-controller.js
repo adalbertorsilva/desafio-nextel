@@ -1,5 +1,7 @@
 const {JsonWebTokenError, sign, verify} = require('jsonwebtoken')
 const autoBind = require('auto-bind')
+const User = require('../models').User
+const Role = require('../models').Role
 require('dotenv').config()
 
 class AuthenticationController {
@@ -11,17 +13,31 @@ class AuthenticationController {
     res.status(200).send({token: this.generateToken()})
   }
 
+  async handleTokenValidation (req, res, next) {
+
+    const decodedToken = this.decodeToken(req.get('Authorization'))
+    if (decodedToken.isValid) {
+      req.body.requestUser = await User.findById(decodedToken.user_id, {include:[{ model: Role, as:'roles' }]})
+      next()
+    } else {
+      res.status(403).send({message: "Token is not valid"})
+    }
+  }
+
   generateToken () {
     return sign({}, process.env.TOKEN_SECRET)
   }
 
-  validateToken (token) {
+  decodeToken (token) {
+    let decodedToken = {}
     try {
-      verify(token, process.env.TOKEN_SECRET)
-      return true   
+      decodedToken = verify(token, process.env.TOKEN_SECRET)
+      decodedToken.isValid = true   
     } catch (JsonWebTokenError) {
-      return false
+      decodedToken.isValid = false
     }
+
+    return decodedToken
   }
 
 }

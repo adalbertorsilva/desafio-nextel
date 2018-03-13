@@ -12,13 +12,13 @@ describe('Authentication', () => {
     it('Must return false when the token is not valid', () =>{
         const authenticationController = new AuthenticationController()
         const token = 'notvalidtoken'
-        expect(authenticationController.validateToken(token)).toBeFalsy()
+        expect(authenticationController.decodeToken(token).isValid).toBeFalsy()
     })
 
     it('Must return true when the token not valid', () =>{
         const authenticationController = new AuthenticationController()
         const token = authenticationController.generateToken()
-        expect(authenticationController.validateToken(token)).toBeTruthy()
+        expect(authenticationController.decodeToken(token).isValid).toBeTruthy()
     })
   })
 })
