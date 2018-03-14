@@ -2,7 +2,6 @@ const {verify} = require('jsonwebtoken')
 const User = require('../models').User
 const Role = require('../models').Role
 const UserRole = require('../models').UserRole
-const autoBind = require('auto-bind')
 const BaseController = require('./base-controller')
 
 class UserController extends BaseController {
@@ -10,11 +9,6 @@ class UserController extends BaseController {
   constructor () {
     super()
     this.ENTITY = 'USER'
-  }
-
-  validateUserPermition (req, res, next) {
-    this.requestUser = req.body.requestUser
-    this.requestUser.isAdmin() ? next() : res.status(this.ACTION_FORBIDDEN_STATUS).send({message: "User doesn't have permition do this action"})
   }
 
   async create (req, res, next) {
@@ -34,7 +28,7 @@ class UserController extends BaseController {
 
   async findAll (req, res) {
     const users = await User.findAll()
-    res.status(this.OK_STATUS).send(users)
+    res.status(200).send(users)
   }
 
   async update (req, res, next) {
@@ -60,7 +54,7 @@ class UserController extends BaseController {
   async find (req, res) {
     const user = await User.findById(req.params.id, {include:[{ model: Role, as:'roles' }]})
     user.roles = user.roles.map(role => role.responseObject())
-    res.status(this.OK_STATUS).send(user.responseObject())
+    res.status(200).send(user.responseObject())
   }
 
   async delete (req, res, next) {

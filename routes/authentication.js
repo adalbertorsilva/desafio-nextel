@@ -2,6 +2,5 @@ const AuthenticationController = require('../controllers/authentication-controll
 const authenticationController = new AuthenticationController()
 
 module.exports = (app) => {
-  app.get('/authenticate', authenticationController.handleAuthentication)
-  app.use(authenticationController.handleTokenValidation)
+  app.post('/authenticate', authenticationController.handleAuthentication)
 }

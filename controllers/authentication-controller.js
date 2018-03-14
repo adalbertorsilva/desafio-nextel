@@ -9,8 +9,14 @@ class AuthenticationController {
     autoBind(this)
   }
 
-  handleAuthentication (req, res) {
-    res.status(200).send({token: this.generateToken()})
+  async handleAuthentication (req, res) {
+    const user = await User.find({where: {username: req.body.username}})
+
+    if (user === null) {
+      return res.status(403).send({message: 'User not found!'})
+    }
+
+    user.validatePassword(req.body.password) ? res.status(200).send({token: this.generateToken(user)}) : res.status(403).send({message: 'Invalid password!'})
   }
 
   async handleTokenValidation (req, res, next) {
@@ -24,8 +30,8 @@ class AuthenticationController {
     }
   }
 
-  generateToken () {
-    return sign({}, process.env.TOKEN_SECRET)
+  generateToken (user) {
+    return sign({user_id: user.id}, process.env.TOKEN_SECRET)
   }
 
   decodeToken (token) {

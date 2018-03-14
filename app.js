@@ -9,8 +9,6 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(cors())
 
-require('./routes/authentication')(app)
-require('./routes/user')(app)
-require('./routes/audit-events')(app)
+require('./routes/config')(app)
 
 module.exports = app

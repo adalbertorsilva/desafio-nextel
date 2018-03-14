@@ -3,25 +3,30 @@ const autoBind = require('auto-bind')
 class BaseController {
   constructor () {
     autoBind(this)
-    this.OK_STATUS = 200
-    this.ACTION_FORBIDDEN_STATUS = 403
     this.CREATE_ACTION = 'CREATE'
     this.UPDATE_ACTION = 'UPDATE'
     this.DELETE_ACTION = 'DELETE'
   }
 
+  validateUserPermition (req, res, next) {
+    req.body.requestUser.isAdmin() ? 
+      next() : 
+      res.status(403)
+         .send({message: "User doesn't have permition do this action"})
+  }
+
   configRequestBypass (req, entity, responseObject) {
-    req.body.auditEventObject = this.createAuditEventObject (this.getAction(req), entity)
-    req.body.responseStatus = this.OK_STATUS
+    req.body.auditEventObject = this.createAuditEventObject (req, entity)
+    req.body.responseStatus = 200
     req.body.responseObject = this.getResponseObject(entity, responseObject)
   }
 
-  createAuditEventObject (action, entity) {
+  createAuditEventObject (req, entity) {
     return {
         entity: this.ENTITY,
         entity_id: entity.id,
-        username: this.requestUser.username,
-        action
+        username: req.body.requestUser.username,
+        action: this.getAction(req)
     }
   }
 
