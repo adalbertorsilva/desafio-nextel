@@ -14,14 +14,15 @@ module.exports = (sequelize) => {
       const responseObject = {
         id: this.id,
         name: this.name,
-        alis: this.alias
+        alias: this.alias,
+        area: this.area.responseObject()
       }
 
       return responseObject
     }
 
     static associate (models) {
-      this.hasOne(models.ProtectionArea, {as: 'area'})
+      this.hasOne(models.ProtectionArea, {as: 'area', foreignKey: 'super_hero_id', onDelete: 'CASCADE'})
     }
   }
 

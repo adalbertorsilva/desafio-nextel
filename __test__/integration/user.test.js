@@ -14,15 +14,33 @@ describe('User', () => {
     adminRole = await Role.create({name: 'Admin'})
   })
 
+  const createStandardUser = async () => {
+    const standardUser = await User.create({username: 'standarduser', password: 'standardpassword'})
+    await UserRole.create({user_id: standardUser.id, role_id: standardRole.id})
+    const userToken = jwt.sign({user_id: standardUser.id}, process.env.TOKEN_SECRET)
+
+    standardUser.token = userToken
+
+    return standardUser
+  }
+
+  const createAdminUser = async () => {
+    const adminUser =  await User.create({username:'adminuser', password:'standardpswd'})
+    await UserRole.create({user_id: adminUser.id, role_id: adminRole.id})
+    const userToken = jwt.sign({user_id: adminUser.id}, process.env.TOKEN_SECRET)
+
+    adminUser.token = userToken
+
+    return adminUser
+  }
+
   describe('Test user creation route', () => {
     it('Must return an 403 status if user is not Admin ', async () =>{
       
-        const standardUser = await User.create({username: 'standarduser', password: 'standardpassword'})
-        await UserRole.create({user_id: standardUser.id, role_id: standardRole.id})
-        const userToken = jwt.sign({user_id: standardUser.id}, process.env.TOKEN_SECRET)
+        const standardUser = await createStandardUser()
         const userPayload = {username: 'Payload', password: 'anything'}
 
-        const response = await request(app).post('/users').send(userPayload).set('Authorization', userToken)
+        const response = await request(app).post('/users').send(userPayload).set('Authorization', standardUser.token)
 
         expect(response.status).toBe(403)
         expect(response.body).toHaveProperty('message', "User doesn't have permition do this action")
@@ -30,12 +48,9 @@ describe('User', () => {
 
     it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
       
-      const adminUser =  await User.create({username:'adminuser', password:'standardpswd'})
-      await UserRole.create({user_id: adminUser.id, role_id: adminRole.id})
-      const userToken = jwt.sign({user_id: adminUser.id}, process.env.TOKEN_SECRET)
+      const adminUser =  await createAdminUser()
       const userPayload = {username: 'Payload', password: 'anything', roles: ['standard']}
-
-      const response = await request(app).post('/users').send(userPayload).set('Authorization', userToken)
+      const response = await request(app).post('/users').send(userPayload).set('Authorization', adminUser.token)
 
       expect(response.status).toBe(200)
       expect(response.body).toHaveProperty('id')

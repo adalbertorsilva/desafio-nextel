@@ -11,6 +11,17 @@ module.exports = (sequelize) => {
         super_hero_id: DataTypes.INTEGER
       }, {sequelize, underscored: true})
     }
+
+    responseObject () {
+      const responseObject = {
+        id: this.id,
+        name: this.name,
+        point: this.point,
+        radius: this.radius
+      }
+
+      return responseObject
+    }
   }
   return ProtectionArea;
 };

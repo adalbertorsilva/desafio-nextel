@@ -5,4 +5,8 @@ const superHeroController = new SuperHeroController()
 
 module.exports = (app) => {
   app.post('/heroes', superHeroController.validateUserPermition, superHeroController.create, auditController.createEvent)
+  app.get('/heroes', superHeroController.findAll)
+  app.get('/heroes/:id', superHeroController.find)
+  app.put('/heroes/:id', superHeroController.validateUserPermition, superHeroController.update, auditController.createEvent)
+  app.delete('/heroes/:id', superHeroController.validateUserPermition, superHeroController.delete, auditController.createEvent)
 }

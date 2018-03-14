@@ -18,9 +18,11 @@ class UserController extends BaseController {
       password: user.generatePasswordHash(req.body.password)
     }
 
-    const userResponse = await User.create(userData)
+    const userResponse = await User.create(userData, {include:[{ model: Role, as:'roles' }]})
     const roles = await this.createRoles(req, userResponse.id)
     userResponse.roles = roles.map(role => role.responseObject())
+
+    console.log('---------------> ', userResponse.setRoles)
 
     this.configRequestBypass(req, userResponse)
     next()

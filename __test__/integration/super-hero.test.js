@@ -3,10 +3,11 @@ const app = require('../../app')
 const User = require('../../models').User
 const Role = require('../../models').Role
 const UserRole = require('../../models').UserRole
+const SuperHero = require('../../models').SuperHero
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
-describe('User', () => {
+describe('SUper Hero', () => {
   let standardRole
   let adminRole
   beforeAll(async () => {
@@ -49,13 +50,260 @@ describe('User', () => {
     it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
       
       const adminUser =  await createAdminUser()
-      const heroPayload = { name: 'Spiderman', alias: 'Peter Parker' }
+      const heroPayload = { 
+          name: 'Spiderman', 
+          alias: 'Peter Parker', 
+          area: {
+            name: 'New York',
+            point: { type: 'Point', coordinates: [40.671725,-73.945351]},
+            radius: 8.5
+          }
+        }
 
       const response = await request(app).post('/heroes').send(heroPayload).set('Authorization', adminUser.token)
 
       expect(response.status).toBe(200)
       expect(response.body).toHaveProperty('id')
       expect(response.body.id).not.toBeNull()
+      expect(response.body).toHaveProperty('name', heroPayload.name)
+      expect(response.body).toHaveProperty('alias', heroPayload.alias)
+      expect(response.body).not.toHaveProperty('created_at')
+      expect(response.body).not.toHaveProperty('updated_at')
+      expect(response.body).toHaveProperty('area')
+      expect(response.body.area).toHaveProperty('name', heroPayload.area.name)
+      expect(response.body.area).toHaveProperty('point')
+      expect(response.body.area).toHaveProperty('radius', heroPayload.area.radius)
+      expect(response.body.area).not.toHaveProperty('created_at')
+      expect(response.body.area).not.toHaveProperty('updated_at')
+    })
+  })
+
+  describe('Test super hero find all route', () => {
+    it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
+      
+      const adminUser = await createAdminUser()
+      const response = await request(app).get('/heroes').set('Authorization',  adminUser.token)
+      expect(response.status).toBe(200)
+      expect(response.body).toHaveLength(1)
+      expect(response.body[0]).toHaveProperty('id')
+      expect(response.body[0]).toHaveProperty('name')
+      expect(response.body[0]).toHaveProperty('alias')
+      expect(response.body[0]).not.toHaveProperty('created_at')
+      expect(response.body[0]).not.toHaveProperty('updated_at')
+      expect(response.body[0].area).toHaveProperty('id')
+      expect(response.body[0].area).toHaveProperty('name')
+      expect(response.body[0].area).toHaveProperty('point')
+      expect(response.body[0].area).toHaveProperty('radius')
+      expect(response.body[0].area).not.toHaveProperty('created_at')
+      expect(response.body[0].area).not.toHaveProperty('updated_at')
+    })
+
+    it('Must return an 200 status and a fulfiled object if user is Standard ', async () =>{
+      
+        const standardUser = await createStandardUser()
+        const response = await request(app).get('/heroes').set('Authorization',  standardUser.token)
+        expect(response.status).toBe(200)
+        expect(response.body).toHaveLength(1)
+        expect(response.body[0]).toHaveProperty('id')
+        expect(response.body[0]).toHaveProperty('name')
+        expect(response.body[0]).toHaveProperty('alias')
+        expect(response.body[0]).not.toHaveProperty('created_at')
+        expect(response.body[0]).not.toHaveProperty('updated_at')
+        expect(response.body[0].area).toHaveProperty('id')
+        expect(response.body[0].area).toHaveProperty('name')
+        expect(response.body[0].area).toHaveProperty('point')
+        expect(response.body[0].area).toHaveProperty('radius')
+        expect(response.body[0].area).not.toHaveProperty('created_at')
+        expect(response.body[0].area).not.toHaveProperty('updated_at')
+    })
+  })
+
+  describe('Test super hero find one route', () => {
+    it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
+      
+      const adminUser = await createAdminUser()
+
+      const heroPayload = { 
+          name: 'Spiderman', 
+          alias: 'Peter Parker', 
+          area: {
+            name: 'New York',
+            point: { type: 'Point', coordinates: [40.671725,-73.945351]},
+            radius: 8.5
+          }
+        }
+
+      const heroResponse = await request(app).post('/heroes').send(heroPayload).set('Authorization', adminUser.token)
+
+      const response = await request(app).get(`/heroes/${heroResponse.body.id}`).set('Authorization',  adminUser.token)
+      expect(response.status).toBe(200)
+      expect(response.body).toHaveProperty('id')
+      expect(response.body).toHaveProperty('name')
+      expect(response.body).toHaveProperty('alias')
+      expect(response.body).not.toHaveProperty('created_at')
+      expect(response.body).not.toHaveProperty('updated_at')
+      expect(response.body.area).toHaveProperty('id')
+      expect(response.body.area).toHaveProperty('name')
+      expect(response.body.area).toHaveProperty('point')
+      expect(response.body.area).toHaveProperty('radius')
+      expect(response.body.area).not.toHaveProperty('created_at')
+      expect(response.body.area).not.toHaveProperty('updated_at')
+    })
+
+    it('Must return an 200 status and a fulfiled object if user is Standard ', async () =>{
+      
+        const standardUser = await createStandardUser()
+        const adminUser = await createAdminUser()
+
+        const heroPayload = { 
+            name: 'Spiderman', 
+            alias: 'Peter Parker', 
+            area: {
+                name: 'New York',
+                point: { type: 'Point', coordinates: [40.671725,-73.945351]},
+                radius: 8.5
+            }
+        }
+
+        const heroResponse = await request(app).post('/heroes').send(heroPayload).set('Authorization', adminUser.token)
+        const response = await request(app).get(`/heroes/${heroResponse.body.id}`).set('Authorization',  standardUser.token)
+        expect(response.status).toBe(200)
+        expect(response.body).toHaveProperty('id')
+        expect(response.body).toHaveProperty('name')
+        expect(response.body).toHaveProperty('alias')
+        expect(response.body).not.toHaveProperty('created_at')
+        expect(response.body).not.toHaveProperty('updated_at')
+        expect(response.body.area).toHaveProperty('id')
+        expect(response.body.area).toHaveProperty('name')
+        expect(response.body.area).toHaveProperty('point')
+        expect(response.body.area).toHaveProperty('radius')
+        expect(response.body.area).not.toHaveProperty('created_at')
+        expect(response.body.area).not.toHaveProperty('updated_at')
+    })
+  })
+
+  describe('Test hero update route', () => {
+
+    it('Must return an 403 status if user is not Admin ', async () =>{
+      
+        const standardUser = await createStandardUser()
+        const adminUser = await createAdminUser()
+
+        const heroPayload = { 
+            name: 'Spiderman', 
+            alias: 'Peter Parker', 
+            area: {
+                name: 'New York',
+                point: { type: 'Point', coordinates: [40.671725,-73.945351]},
+                radius: 8.5
+            }
+        }
+
+        const heroResponse = await request(app).post('/heroes').send(heroPayload).set('Authorization', adminUser.token)
+        const response = await request(app).put(`/heroes/${heroResponse.body.id}`).send(heroPayload).set('Authorization', standardUser.token)
+
+        expect(response.status).toBe(403)
+        expect(response.body).toHaveProperty('message', "User doesn't have permition do this action")
+    })
+
+    it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
+      
+      const adminUser = await createAdminUser()
+
+      const heroPayload = { 
+        name: 'Spiderman', 
+        alias: 'Peter Parker', 
+        area: {
+            name: 'New York',
+            point: { type: 'Point', coordinates: [40.671725,-73.945351]},
+            radius: 8.5
+        }
+      }
+
+      const heroUpdatePayload = { 
+        name: 'Venom', 
+        alias: 'Eddie Brock Jr', 
+        area: {
+            name: 'New York City',
+            point: { type: 'Point', coordinates: [40.671725,-73.945351]},
+            radius: 6
+        }
+      }
+
+      const heroResponse = await request(app).post('/heroes').send(heroPayload).set('Authorization', adminUser.token)
+      const response = await request(app).put(`/heroes/${heroResponse.body.id}`).send(heroUpdatePayload).set('Authorization', adminUser.token)
+
+      expect(response.status).toBe(200)
+      expect(response.body).toHaveProperty('id')
+      expect(response.body.id).not.toBeNull()
+      expect(response.body).toHaveProperty('name', heroUpdatePayload.name)
+      expect(response.body).toHaveProperty('alias', heroUpdatePayload.alias)
+      expect(response.body).not.toHaveProperty('created_at')
+      expect(response.body).not.toHaveProperty('updated_at')
+      expect(response.body).toHaveProperty('area')
+      expect(response.body.area).toHaveProperty('name', heroUpdatePayload.area.name)
+      expect(response.body.area).toHaveProperty('point')
+      expect(response.body.area).toHaveProperty('radius', heroUpdatePayload.area.radius)
+      expect(response.body.area).not.toHaveProperty('created_at')
+      expect(response.body.area).not.toHaveProperty('updated_at')
+    })
+  })
+
+  describe('Test hero update route', () => {
+
+    it('Must return an 403 status if user is not Admin ', async () =>{
+      
+        const standardUser = await createStandardUser()
+        const adminUser = await createAdminUser()
+
+        const heroPayload = { 
+            name: 'Spiderman', 
+            alias: 'Peter Parker', 
+            area: {
+                name: 'New York',
+                point: { type: 'Point', coordinates: [40.671725,-73.945351]},
+                radius: 8.5
+            }
+        }
+
+        const heroResponse = await request(app).post('/heroes').send(heroPayload).set('Authorization', adminUser.token)
+        const response = await request(app).delete(`/heroes/${heroResponse.body.id}`).set('Authorization', standardUser.token)
+
+        expect(response.status).toBe(403)
+        expect(response.body).toHaveProperty('message', "User doesn't have permition do this action")
+    })
+
+    it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
+      
+      const adminUser = await createAdminUser()
+
+      const heroPayload = { 
+        name: 'Spiderman', 
+        alias: 'Peter Parker', 
+        area: {
+            name: 'New York',
+            point: { type: 'Point', coordinates: [40.671725,-73.945351]},
+            radius: 8.5
+        }
+      }
+
+      const heroUpdatePayload = { 
+        name: 'Venom', 
+        alias: 'Eddie Brock Jr', 
+        area: {
+            name: 'New York City',
+            point: { type: 'Point', coordinates: [40.671725,-73.945351]},
+            radius: 6
+        }
+      }
+
+      const heroResponse = await request(app).post('/heroes').send(heroPayload).set('Authorization', adminUser.token)
+      const response = await request(app).delete(`/heroes/${heroResponse.body.id}`).set('Authorization', adminUser.token)
+
+      const hero = await SuperHero.findById(heroResponse.body.id)
+
+      expect(response.status).toBe(200)
+      expect(hero).toBeNull()
     })
   })
 })

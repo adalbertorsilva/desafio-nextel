@@ -18,6 +18,7 @@ module.exports = {
         type: Sequelize.FLOAT
       },
       super_hero_id: {
+        allowNull: false,
         type: Sequelize.INTEGER
       },
       created_at: {
