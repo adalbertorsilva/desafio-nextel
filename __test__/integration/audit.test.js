@@ -7,15 +7,40 @@ const AuditEvent = require('../../models').AuditEvent
 const jwt = require('jsonwebtoken')
 
 describe('Authentication', () => {
+
+  let standardRole = {}
+  let adminRole = {}
+  beforeAll(async () => {
+    standardRole = await Role.create({name: 'Standard'})
+    adminRole = await Role.create({name: 'Admin'})
+  })
+  
+  const createStandardUser = async () => {
+    const standardUser = await User.create({username: 'standarduser', password: 'standardpassword'})
+    await UserRole.create({user_id: standardUser.id, role_id: standardRole.id})
+    const userToken = jwt.sign({user_id: standardUser.id}, process.env.TOKEN_SECRET)
+
+    standardUser.token = userToken
+
+    return standardUser
+  }
+
+  const createAdminUser = async () => {
+    const adminUser =  await User.create({username:'adminuser', password:'standardpswd'})
+    await UserRole.create({user_id: adminUser.id, role_id: adminRole.id})
+    const userToken = jwt.sign({user_id: adminUser.id}, process.env.TOKEN_SECRET)
+
+    adminUser.token = userToken
+
+    return adminUser
+  }
+
   describe('Test audit event creation', () => {
     it('Must create an audit event on database', async () =>{
-        const adminUser = await User.create({username: 'adminuser', password: 'standardpassword'})
-        const adminRole = await Role.create({name: 'Admin'})
-        await UserRole.create({user_id: adminUser.id, role_id: adminRole.id})
-        const userToken = jwt.sign({user_id: adminUser.id}, process.env.TOKEN_SECRET)
+        const adminUser = await createAdminUser()
         const userPayload = {username: 'Payload', password: 'anything', roles: ['standard']}
 
-        const response = await request(app).post('/users').send(userPayload).set('Authorization', userToken)
+        const response = await request(app).post('/users').send(userPayload).set('Authorization', adminUser.token)
 
         expect(response.status).toBe(200)
 
@@ -26,13 +51,10 @@ describe('Authentication', () => {
   })
 
   describe('Test audit event find all', () => {
-    it('Must generate a token for the user', async () =>{
-        const adminUser = await User.create({username: 'adminuser', password: 'standardpassword'})
-        const adminRole = await Role.create({name: 'Admin'})
-        await UserRole.create({user_id: adminUser.id, role_id: adminRole.id})
-        const userToken = jwt.sign({user_id: adminUser.id}, process.env.TOKEN_SECRET)
+    it('Must return 200 a list of objects', async () =>{
+        const adminUser = await createAdminUser()
 
-        const response = await request(app).get('/audit_events').set('Authorization', userToken)
+        const response = await request(app).get('/audit_events').set('Authorization', adminUser.token)
 
         expect(response.status).toBe(200)
         expect(response.body).toHaveLength(1)

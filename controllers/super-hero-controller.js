@@ -1,6 +1,8 @@
 const BaseController = require('./base-controller')
 const SuperHero = require('../models').SuperHero
+const SuperPower = require('../models').SuperPower
 const ProtectionArea = require('../models').ProtectionArea
+const HeroPower = require('../models').HeroPower
 
 class SuperHeroController extends BaseController{
   constructor () {
@@ -10,22 +12,25 @@ class SuperHeroController extends BaseController{
 
   async create (req, res, next) {
     const heroResponse = await SuperHero.create(req.body, {include:[{ model: ProtectionArea, as:'area' }]})
+    await heroResponse.setPowers(this.getHeroPowers(req))
     this.configRequestBypass(req, heroResponse)
     next()
   }
 
   async findAll (req, res) {
     const heroes = await SuperHero.findAll({include:[{ model: ProtectionArea, as:'area' }]})
-    res.status(200).send(heroes.map(hero => hero.responseObject()))
+    const heroesResponse = await Promise.all(heroes.map(async hero => await this.getResponseObject(hero)))
+    res.status(200).send(heroesResponse)
   }
 
   async find (req, res) {
     const hero = await SuperHero.findById(req.params.id, {include:[{ model: ProtectionArea, as:'area' }]})
-    res.status(200).send(hero.responseObject())
+    res.status(200).send(await hero.responseObject())
   }
 
   async update (req, res, next) {
-    const hero = await SuperHero.findById(req.params.id, {include:[{ model: ProtectionArea, as:'area' }]})
+    const hero = await SuperHero.findById(req.params.id, {include:[{ model: ProtectionArea, as:'area' }, { model: SuperPower, as:'powers' }]})
+    await hero.setPowers(this.getHeroPowers(req))
     const updatedHero = await hero.updateAttributes(req.body)
     this.configRequestBypass(req, updatedHero)
     next()
@@ -36,6 +41,10 @@ class SuperHeroController extends BaseController{
     await SuperHero.destroy({where:{id: req.params.id}})
     this.configRequestBypass(req, hero, {message: 'Super hero removed'})
     next()
+  }
+
+  getHeroPowers (req) {
+    return req.body.powers ? req.body.powers.map(power => power.id) : []
   }
 }
 

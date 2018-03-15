@@ -15,10 +15,10 @@ class BaseController {
          .send({message: "User doesn't have permition do this action"})
   }
 
-  configRequestBypass (req, entity, responseObject) {
+  async configRequestBypass (req, entity, responseObject) {
     req.body.auditEventObject = this.createAuditEventObject (req, entity)
     req.body.responseStatus = 200
-    req.body.responseObject = this.getResponseObject(entity, responseObject)
+    req.body.responseObject = await this.getResponseObject(entity, responseObject)
   }
 
   createAuditEventObject (req, entity) {
@@ -41,8 +41,8 @@ class BaseController {
     }
   }
 
-  getResponseObject (entity, responseObject) {
-    return responseObject ? responseObject : entity.responseObject()
+  async getResponseObject (entity, responseObject) {
+    return responseObject ? responseObject : await entity.responseObject()
   }
 }
 

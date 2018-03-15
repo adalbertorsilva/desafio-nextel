@@ -16,7 +16,13 @@ module.exports = (sequelize) => {
 
     generatePasswordHash (password) {
       const salt = bcrypt.genSaltSync()
-      return bcrypt.hashSync(password, salt)
+
+      if (password) {
+        return bcrypt.hashSync(password, salt)
+      } else {
+        this.password = bcrypt.hashSync(this.password, salt)
+        return this.password
+      }
     }
 
     validatePassword (password) {
@@ -40,11 +46,7 @@ module.exports = (sequelize) => {
     }
 
     static associate (models) {
-      this.belongsToMany(models.Role, {
-        through: 'UserRole',
-        onDelete: 'CASCADE',
-        as: 'roles'
-      })
+      this.belongsToMany(models.Role, { through: 'UserRoles', onDelete: 'CASCADE', as: 'roles', foreignKey: 'user_id' })
     }
   }
 

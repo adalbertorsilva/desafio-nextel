@@ -12,17 +12,30 @@ class UserController extends BaseController {
   }
 
   async create (req, res, next) {
-    const user  = new User()
-    const userData = {
-      username: req.body.username,
-      password: user.generatePasswordHash(req.body.password)
-    }
+    // const user  = new User()
+    // const userData = {
+    //   username: req.body.username,
+    //   password: user.generatePasswordHash(req.body.password)
+    // }
 
-    const userResponse = await User.create(userData, {include:[{ model: Role, as:'roles' }]})
+    // const userResponse = await User.create(userData, {include:[{ model: Role, as:'roles' }]})
+    // const roles = await this.createRoles(req, userResponse.id)
+    // userResponse.roles = roles.map(role => role.responseObject())
+
+    // this.configRequestBypass(req, userResponse)
+    // next()
+
+    const user  = User.build({
+      username: req.body.username,
+      password: req.body.password
+    })
+    user.generatePasswordHash()
+    
+    
+
+    const userResponse = await User.create(user.dataValues)
     const roles = await this.createRoles(req, userResponse.id)
     userResponse.roles = roles.map(role => role.responseObject())
-
-    console.log('---------------> ', userResponse.setRoles)
 
     this.configRequestBypass(req, userResponse)
     next()

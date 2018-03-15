@@ -68,6 +68,17 @@ describe('User', () => {
   })
 
   describe('Test user find all route', () => {
+
+    it('Must return an 403 status if user is not Admin ', async () =>{
+      
+      const standardUser = await createStandardUser()
+
+      const response = await request(app).get('/users').set('Authorization', standardUser.token)
+
+      expect(response.status).toBe(403)
+      expect(response.body).toHaveProperty('message', "User doesn't have permition do this action")
+  })
+
     it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
       
       const adminUser =  await User.create({username:'adminuser', password:'standardpswd'})
@@ -77,11 +88,22 @@ describe('User', () => {
       const response = await request(app).get('/users').set('Authorization', userToken)
 
       expect(response.status).toBe(200)
-      expect(response.body).toHaveLength(4)
+      expect(response.body).toHaveLength(5)
     })
   })
 
   describe('Test user update route', () => {
+
+    it('Must return an 403 status if user is not Admin ', async () =>{
+      
+      const standardUser = await createStandardUser()
+
+      const response = await request(app).put(`/users/${standardUser.id}`).send({}).set('Authorization', standardUser.token)
+
+      expect(response.status).toBe(403)
+      expect(response.body).toHaveProperty('message', "User doesn't have permition do this action")
+  })
+
     it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
       
       const adminUser =  await User.create({username:'adminuser', password:'standardpswd'})
@@ -107,6 +129,17 @@ describe('User', () => {
   })
 
   describe('Test user find one route', () => {
+
+    it('Must return an 403 status if user is not Admin ', async () =>{
+        
+      const standardUser = await createStandardUser()
+
+      const response = await request(app).get(`/users/${standardUser.id}`).set('Authorization', standardUser.token)
+
+      expect(response.status).toBe(403)
+      expect(response.body).toHaveProperty('message', "User doesn't have permition do this action")
+    })
+
     it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
       
       const adminUser =  await User.create({username:'adminuser', password:'standardpswd'})
@@ -125,6 +158,17 @@ describe('User', () => {
   })
 
   describe('Test user delete route', () => {
+
+    it('Must return an 403 status if user is not Admin ', async () =>{
+        
+      const standardUser = await createStandardUser()
+
+      const response = await request(app).delete(`/users/${standardUser.id}`).set('Authorization', standardUser.token)
+
+      expect(response.status).toBe(403)
+      expect(response.body).toHaveProperty('message', "User doesn't have permition do this action")
+    })
+
     it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
       
       const adminUser =  await User.create({username:'adminuser', password:'standardpswd'})
