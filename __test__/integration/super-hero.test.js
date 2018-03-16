@@ -20,7 +20,7 @@ describe('Super Hero', () => {
   })
 
   const createStandardUser = async () => {
-    const standardUser = await User.create({username: 'standarduser', password: 'standardpassword'})
+    const standardUser = await User.create({username: 'superherostandarduser', password: 'standardpassword'})
     await UserRole.create({user_id: standardUser.id, role_id: standardRole.id})
     const userToken = jwt.sign({user_id: standardUser.id}, process.env.TOKEN_SECRET)
 
@@ -30,7 +30,7 @@ describe('Super Hero', () => {
   }
 
   const createAdminUser = async () => {
-    const adminUser =  await User.create({username:'adminuser', password:'standardpswd'})
+    const adminUser =  await User.create({username:'superheroadminuser', password:'standardpswd'})
     await UserRole.create({user_id: adminUser.id, role_id: adminRole.id})
     const userToken = jwt.sign({user_id: adminUser.id}, process.env.TOKEN_SECRET)
 
@@ -42,7 +42,7 @@ describe('Super Hero', () => {
   describe('Test hero creation route', () => {
     it('Must return an 403 status if user is not Admin ', async () => {
       
-        const heroPayload = { name: 'Spiderman', alias: 'Peter Parker' }
+        const heroPayload = { name: 'Superman', alias: 'Clark Kent' }
 
         const response = await request(app).post('/heroes').send(heroPayload).set('Authorization', standardUser.token)
 
@@ -53,10 +53,10 @@ describe('Super Hero', () => {
     it('Must return an 200 status and a fulfiled object if user is Admin ', async () => {
       
       const heroPayload = { 
-          name: 'Spiderman', 
-          alias: 'Peter Parker', 
+          name: 'Superman', 
+          alias: 'Clark Kent', 
           area: {
-            name: 'New York',
+            name: 'Metripolis',
             point: { type: 'Point', coordinates: [40.671725,-73.945351]},
             radius: 8.5
           }
@@ -77,6 +77,24 @@ describe('Super Hero', () => {
       expect(response.body.area).toHaveProperty('radius', heroPayload.area.radius)
       expect(response.body.area).not.toHaveProperty('created_at')
       expect(response.body.area).not.toHaveProperty('updated_at')
+    })
+
+    it('Must return an 403 status and a fulfiled object with an error message ', async () => {
+      
+      const heroPayload = { 
+          name: 'Superman', 
+          alias: 'Clark Kent', 
+          area: {
+            name: 'Metripolis',
+            point: { type: 'Point', coordinates: [40.671725,-73.945351]},
+            radius: 8.5
+          }
+        }
+
+      const response = await request(app).post('/heroes').send(heroPayload).set('Authorization', adminUser.token)
+
+      expect(response.status).toBe(403)
+      expect(response.body).toHaveProperty('message', "Super hero already exists")
     })
   })
 
@@ -122,10 +140,10 @@ describe('Super Hero', () => {
     it('Must return an 200 status and a fulfiled object if user is Admin ', async () => {
 
       const heroPayload = { 
-          name: 'Spiderman', 
-          alias: 'Peter Parker', 
+          name: 'Batman', 
+          alias: 'Bruce Wayne', 
           area: {
-            name: 'New York',
+            name: 'Gotham City',
             point: { type: 'Point', coordinates: [40.671725,-73.945351]},
             radius: 8.5
           }
@@ -151,10 +169,10 @@ describe('Super Hero', () => {
     it('Must return an 200 status and a fulfiled object if user is Standard ', async () => {
 
         const heroPayload = { 
-            name: 'Spiderman', 
-            alias: 'Peter Parker', 
+            name: 'Wonder Woman', 
+            alias: 'Princess Diana of Themyscira', 
             area: {
-                name: 'New York',
+                name: 'Themyscira',
                 point: { type: 'Point', coordinates: [40.671725,-73.945351]},
                 radius: 8.5
             }
@@ -182,10 +200,10 @@ describe('Super Hero', () => {
     it('Must return an 403 status if user is not Admin ', async () => {
 
         const heroPayload = { 
-            name: 'Spiderman', 
-            alias: 'Peter Parker', 
+            name: 'Green Lantern', 
+            alias: 'Hal Jordan', 
             area: {
-                name: 'New York',
+                name: 'Chicago',
                 point: { type: 'Point', coordinates: [40.671725,-73.945351]},
                 radius: 8.5
             }
@@ -201,20 +219,20 @@ describe('Super Hero', () => {
     it('Must return an 200 status and a fulfiled object if user is Admin ', async () => {
 
       const heroPayload = { 
-        name: 'Spiderman', 
-        alias: 'Peter Parker', 
+        name: 'Flash', 
+        alias: 'Jay Garrick', 
         area: {
-            name: 'New York',
+            name: 'Justice League HC',
             point: { type: 'Point', coordinates: [40.671725,-73.945351]},
             radius: 8.5
         }
       }
 
       const heroUpdatePayload = { 
-        name: 'Venom', 
-        alias: 'Eddie Brock Jr', 
+        name: 'Aquaman', 
+        alias: 'Arthur Curry II', 
         area: {
-            name: 'New York City',
+            name: 'Atlantis',
             point: { type: 'Point', coordinates: [40.671725,-73.945351]},
             radius: 6
         }
@@ -244,10 +262,10 @@ describe('Super Hero', () => {
     it('Must return an 403 status if user is not Admin ', async () => {
 
         const heroPayload = { 
-            name: 'Spiderman', 
-            alias: 'Peter Parker', 
+            name: 'Nightwing', 
+            alias: 'Dick Grayson', 
             area: {
-                name: 'New York',
+                name: 'Bludraven',
                 point: { type: 'Point', coordinates: [40.671725,-73.945351]},
                 radius: 8.5
             }
@@ -263,10 +281,10 @@ describe('Super Hero', () => {
     it('Must return an 200 status and a fulfiled object if user is Admin ', async () => {
 
       const heroPayload = { 
-        name: 'Spiderman', 
-        alias: 'Peter Parker', 
+        name: 'Red Hood', 
+        alias: 'Jason Todd', 
         area: {
-            name: 'New York',
+            name: 'Pitsburg',
             point: { type: 'Point', coordinates: [40.671725,-73.945351]},
             radius: 8.5
         }

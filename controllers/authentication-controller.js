@@ -2,13 +2,25 @@ const {JsonWebTokenError, sign, verify} = require('jsonwebtoken')
 const autoBind = require('auto-bind')
 const User = require('../models').User
 const Role = require('../models').Role
+const BaseController = require('./base-controller')
 require('dotenv').config()
 
-class AuthenticationController {
-  constructor () {
-    autoBind(this)
-  }
+/**
+ * @class
+ * Class responsible for handle athentication events
+ */
+class AuthenticationController extends BaseController{
 
+   /**
+   * @function
+   * Validates if it's a valid user by username and login 
+   * passed on request
+   * 
+   * @param req http request
+   * @param res http response
+   * 
+   * @returns
+   */
   async handleAuthentication (req, res) {
 
     const user = await User.find({where: {username: req.body.username}})

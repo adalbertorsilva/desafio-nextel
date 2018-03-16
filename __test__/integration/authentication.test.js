@@ -4,9 +4,12 @@ const User = require('../../models').User
 
 describe('Authentication', () => {
   describe('Test user token generation', () => {
-    it('Must generate a token for the user', async () => {
+    let adminUser
+    beforeAll(async () => {
+      adminUser = await User.create({username:'authadminuser', password: 'standardpassword'})
+    })
 
-      const adminUser = await User.create({username:'authadminuser', password: 'standardpassword'})
+    it('Must generate a token for the user', async () => {
 
       const userPayload = {username: 'authadminuser', password: 'standardpassword'}
 
@@ -19,8 +22,7 @@ describe('Authentication', () => {
 
     it('Must return a 403 and an error message if password is not correct', async () => {
       
-      const adminUser = await User.create({username:'adminuser', password: 'standardpassword'})
-      const userPayload = {username: 'adminuser', password: 'bla bla bla'}
+      const userPayload = {username: 'authadminuser', password: 'bla bla bla'}
 
       const response = await request(app).post('/authenticate').send(userPayload)
 
@@ -30,7 +32,6 @@ describe('Authentication', () => {
 
     it('Must return a 403 and an error message if user does not exist', async () => {
 
-      const adminUser = await User.create({username:'adminuser', password: 'standardpassword'})
       const userPayload = {username: 'i do not exist', password: 'standardpassword'}
 
       const response = await request(app).post('/authenticate').send(userPayload)

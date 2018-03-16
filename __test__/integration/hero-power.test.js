@@ -21,7 +21,7 @@ describe('Super Hero Powers', () => {
   })
 
   const createAdminUser = async () => {
-    const adminUser =  await User.create({username:'adminuser', password:'standardpswd'})
+    const adminUser =  await User.create({username:'heropoweradminuser', password:'standardpswd'})
     await UserRole.create({user_id: adminUser.id, role_id: adminRole.id})
     const userToken = jwt.sign({user_id: adminUser.id}, process.env.TOKEN_SECRET)
 
@@ -34,12 +34,12 @@ describe('Super Hero Powers', () => {
 
     it('Must return an 200 status and a fulfiled object with powers attribute ', async () =>{
       
-      const power = await SuperPower.create({ name: 'Spider insinct', description: 'Sense incoming threats' })
+      const power = await SuperPower.create({ name: 'Kamehameha', description: 'KAME.....HAME.....HA !!!!!!!!' })
       const heroPayload = { 
-          name: 'Spiderman', 
-          alias: 'Peter Parker', 
+          name: 'Goku', 
+          alias: 'Kakaroto', 
           area: {
-            name: 'New York',
+            name: 'Earth',
             point: { type: 'Point', coordinates: [40.671725,-73.945351]},
             radius: 8.5
           },
@@ -95,12 +95,12 @@ describe('Super Hero Powers', () => {
   describe('Test super hero find one route', () => {
     it('Must return an 200 status and a fulfiled object with powers attribute ', async () =>{
       
-      const power = await SuperPower.create({ name: 'Spider insinct', description: 'Sense incoming threats' })
+      const power = await SuperPower.create({ name: 'Fuse with Kamisama', description: 'Gives the true namekuseidin power' })
       const heroPayload = { 
-          name: 'Spiderman', 
-          alias: 'Peter Parker', 
+          name: 'Picollo', 
+          alias: 'Green fighter ET', 
           area: {
-            name: 'New York',
+            name: 'Namekusei',
             point: { type: 'Point', coordinates: [40.671725,-73.945351]},
             radius: 8.5
           },
@@ -132,14 +132,14 @@ describe('Super Hero Powers', () => {
   describe('Test hero update route', () => {
     it('Must return an 200 status and a fulfiled object with powers attribute ', async () =>{
       
-      const power = await SuperPower.create({ name: 'Spider insinct', description: 'Sense incoming threats' })
-      const vilainPower = await SuperPower.create({ name: 'Symbionte', description: 'Expands physical power' })
+      const power = await SuperPower.create({ name: 'Galick Blazer', description: "Vegeta's energy sphere" })
+      const vilainPower = await SuperPower.create({ name: 'Destroy The Planet!', description: 'Namekusei will explode in five LONG minutes' })
 
       const heroPayload = { 
-        name: 'Spiderman', 
-        alias: 'Peter Parker', 
+        name: 'Vegeta', 
+        alias: 'Sayan Prince', 
         area: {
-            name: 'New York',
+            name: 'Planet Vegeta',
             point: { type: 'Point', coordinates: [40.671725,-73.945351]},
             radius: 8.5
         },
@@ -147,10 +147,10 @@ describe('Super Hero Powers', () => {
       }
 
       const heroUpdatePayload = { 
-        name: 'Venom', 
-        alias: 'Eddie Brock Jr', 
+        name: 'Frieza', 
+        alias: 'Freeza', 
         area: {
-            name: 'New York City',
+            name: 'Any Planet',
             point: { type: 'Point', coordinates: [40.671725,-73.945351]},
             radius: 6
         },
@@ -184,14 +184,17 @@ describe('Super Hero Powers', () => {
 
     it('Must return an 200 status and a fulfiled object with powers attribute ', async () =>{
 
+      const power = await SuperPower.create({ name: 'Turtle Shell', description: "Helps on jump trainning" })
+
       const heroPayload = { 
-        name: 'Spiderman', 
-        alias: 'Peter Parker', 
+        name: 'Master Kame', 
+        alias: 'Jack Chun', 
         area: {
-            name: 'New York',
+            name: 'Kame Island',
             point: { type: 'Point', coordinates: [40.671725,-73.945351]},
             radius: 8.5
-        }
+        },
+        powers: [{id: power.id, name: power.name, description: power.description}]
       }
 
       const heroResponse = await request(app).post('/heroes').send(heroPayload).set('Authorization', adminUser.token)

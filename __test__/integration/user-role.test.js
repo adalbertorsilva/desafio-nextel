@@ -18,7 +18,7 @@ describe('User Roles', () => {
   })
 
   const createAdminUser = async () => {
-    const adminUser =  await User.create({username:'adminuser', password:'standardpswd'})
+    const adminUser =  await User.create({username:'userroleadminuser', password:'standardpswd'})
     await UserRole.create({user_id: adminUser.id, role_id: adminRole.id})
     const userToken = jwt.sign({user_id: adminUser.id}, process.env.TOKEN_SECRET)
 
@@ -52,7 +52,7 @@ describe('User Roles', () => {
   })
 
   describe('Test user find all route', () => {
-    it('Must return an 200 status and a fulfiled object with routes attribute ', async () =>{
+    it('Must return an 200 status and a list of fulfiled objects with routes attribute ', async () =>{
       
       const response = await request(app).get(`/users/${0}/${1}`).set('Authorization',  adminUser.token)
       expect(response.status).toBe(200)
@@ -69,7 +69,7 @@ describe('User Roles', () => {
   describe('Test user find one route', () => {
     it('Must return an 200 status and a fulfiled object with roles attribute ', async () =>{
       
-        const userPayload = { username:'user role user', password:'blablabla' ,
+        const userPayload = { username:'another user role user', password:'blablabla' ,
             roles: [{id: standardRole.id, name: standardRole.name}]
           }
 
@@ -91,7 +91,7 @@ describe('User Roles', () => {
   describe('Test hero update route', () => {
     it('Must return an 200 status and a fulfiled object with powers attribute ', async () =>{
 
-      const userPayload = { username:'user role user', password:'blablabla' ,
+      const userPayload = { username:'one more user role user', password:'blablabla' ,
         roles: [{id: standardRole.id, name: standardRole.name}]
       }
 
@@ -119,7 +119,7 @@ describe('User Roles', () => {
 
     it('Must return an 200 status and a fulfiled object with powers attribute ', async () =>{
 
-      const userPayload = { username:'user role user', password:'blablabla' ,
+      const userPayload = { username:'user role user once more', password:'blablabla' ,
         roles: [{id: standardRole.id, name: standardRole.name}]
       }
 

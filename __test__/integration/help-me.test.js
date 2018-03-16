@@ -22,7 +22,7 @@ describe('Help me', async () => {
   })
   
   const createStandardUser = async () => {
-    const standardUser = await User.create({username: 'standarduser', password: 'standardpassword'})
+    const standardUser = await User.create({username: 'helpstandarduser', password: 'standardpassword'})
     await UserRole.create({user_id: standardUser.id, role_id: standardRole.id})
     const userToken = jwt.sign({user_id: standardUser.id}, process.env.TOKEN_SECRET)
 
@@ -32,7 +32,7 @@ describe('Help me', async () => {
   }
 
   const createAdminUser = async () => {
-    const adminUser =  await User.create({username:'auditadminuser', password:'standardpswd'})
+    const adminUser =  await User.create({username:'helpadminuser', password:'standardpswd'})
     await UserRole.create({user_id: adminUser.id, role_id: adminRole.id})
     const userToken = jwt.sign({user_id: adminUser.id}, process.env.TOKEN_SECRET)
 
@@ -42,7 +42,7 @@ describe('Help me', async () => {
   }
   describe('Test help call', () => {
 
-    it('Must return a 200 status and a list of heroes', async () =>{
+    it('Must return a 200 status and a list of heroes within 10 km radius from the calling point', async () =>{
 
         const spidermanPayload = { 
           name: 'Spiderman', 

@@ -11,10 +11,15 @@ class UserController extends BaseController {
   }
 
   async create (req, res, next) {
-    const userResponse = await User.create(req.body)
-    await userResponse.setRoles(this.getUserRoles(req))
-    await this.configRequestBypass(req, userResponse)
-    next()
+
+    try {
+      const userResponse = await User.create(req.body)
+      await userResponse.setRoles(this.getUserRoles(req))
+      await this.configRequestBypass(req, userResponse)
+      next() 
+    } catch (error) {
+      res.status(403).send({message: 'User already exists'})
+    }
   }
 
   async findAll (req, res) {

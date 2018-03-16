@@ -8,9 +8,13 @@ class SuperPowerController extends BaseController {
   }
 
   async create (req, res, next) {
-    const powerResponse = await SuperPower.create(req.body)
-    await this.configRequestBypass(req, powerResponse)
-    next()
+    try {
+      const powerResponse = await SuperPower.create(req.body)
+      await this.configRequestBypass(req, powerResponse)
+      next() 
+    } catch (error) {
+      res.status(403).send({message: 'Super Power already exists'})
+    }
   }
 
   async findAll (req, res) {

@@ -11,10 +11,14 @@ class SuperHeroController extends BaseController{
   }
 
   async create (req, res, next) {
-    const heroResponse = await SuperHero.create(req.body, {include:[{ model: ProtectionArea, as:'area' }]})
-    await heroResponse.setPowers(this.getHeroPowers(req))
-    await this.configRequestBypass(req, heroResponse)
-    next()
+    try {
+      const heroResponse = await SuperHero.create(req.body, {include:[{ model: ProtectionArea, as:'area' }]})
+      await heroResponse.setPowers(this.getHeroPowers(req))
+      await this.configRequestBypass(req, heroResponse)
+      next() 
+    } catch (error) {
+      res.status(403).send({message:'Super hero already exists'})
+    }
   }
 
   async findAll (req, res) {

@@ -60,6 +60,15 @@ describe('User', () => {
       expect(response.body).toHaveProperty('password')
       expect(response.body.password).not.toEqual(userPayload.password)
     })
+
+    it('Must return an 403 status and a fulfiled object with an error message  ', async () =>{
+      
+      const userPayload = {username: 'Payload', password: 'anything'}
+      const response = await request(app).post('/users').send(userPayload).set('Authorization', adminUser.token)
+
+      expect(response.status).toBe(403)
+      expect(response.body).toHaveProperty('message', "User already exists")
+    })
   })
 
   describe('Test user find all route', () => {
@@ -93,7 +102,7 @@ describe('User', () => {
 
     it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
 
-      const userPayload = {username: 'Payload', password: 'anything', bla: true}
+      const userPayload = {username: 'user update Payload', password: 'anything', bla: true}
       const userUpdatePayload = {username: 'Other Payload', password: 'something'}
 
       const userResponse = await request(app).post('/users').send(userPayload).set('Authorization', adminUser.token)

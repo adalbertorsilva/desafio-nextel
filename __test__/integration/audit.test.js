@@ -6,7 +6,7 @@ const UserRole = require('../../models').UserRole
 const AuditEvent = require('../../models').AuditEvent
 const jwt = require('jsonwebtoken')
 
-describe('Authentication', async () => {
+describe('Audit', async () => {
 
   let standardRole = {}
   let adminRole = {}
@@ -21,7 +21,7 @@ describe('Authentication', async () => {
   })
   
   const createStandardUser = async () => {
-    const standardUser = await User.create({username: 'standarduser', password: 'standardpassword'})
+    const standardUser = await User.create({username: 'auditstandarduser', password: 'standardpassword'})
     await UserRole.create({user_id: standardUser.id, role_id: standardRole.id})
     const userToken = jwt.sign({user_id: standardUser.id}, process.env.TOKEN_SECRET)
 
@@ -31,7 +31,7 @@ describe('Authentication', async () => {
   }
 
   const createAdminUser = async () => {
-    const adminUser =  await User.create({username:'auditadminuser', password:'standardpswd'})
+    const adminUser =  await User.create({username:'adminauditadminuser', password:'standardpswd'})
     await UserRole.create({user_id: adminUser.id, role_id: adminRole.id})
     const userToken = jwt.sign({user_id: adminUser.id}, process.env.TOKEN_SECRET)
 
@@ -43,7 +43,7 @@ describe('Authentication', async () => {
   describe('Test audit event creation', () => {
 
     it('Must create an audit event on database', async () =>{
-        const userPayload = {username: 'Payload', password: 'anything', roles: [{id: standardRole.id, name: standardRole.name}]}
+        const userPayload = {username: 'audit user Payload', password: 'anything', roles: [{id: standardRole.id, name: standardRole.name}]}
 
         const response = await request(app).post('/users').send(userPayload).set('Authorization', adminUser.token)
 
