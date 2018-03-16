@@ -8,4 +8,5 @@ module.exports = (app) => {
   require('./audit-events')(app)
   require('./super-hero')(app)
   require('./super-power')(app)
+  require('./help')(app)
 }

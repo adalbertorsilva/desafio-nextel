@@ -6,13 +6,18 @@ const UserRole = require('../../models').UserRole
 const AuditEvent = require('../../models').AuditEvent
 const jwt = require('jsonwebtoken')
 
-describe('Authentication', () => {
+describe('Authentication', async () => {
 
   let standardRole = {}
   let adminRole = {}
+  let adminUser = {}
+  let standardUser = {} 
+
   beforeAll(async () => {
-    standardRole = await Role.create({name: 'Standard'})
-    adminRole = await Role.create({name: 'Admin'})
+    standardRole = await Role.find({where: {name: 'Standard'}})
+    adminRole = await Role.find({where: {name: 'Admin'}})
+    adminUser = await createAdminUser()
+    standardUser = await createStandardUser()
   })
   
   const createStandardUser = async () => {
@@ -26,7 +31,7 @@ describe('Authentication', () => {
   }
 
   const createAdminUser = async () => {
-    const adminUser =  await User.create({username:'adminuser', password:'standardpswd'})
+    const adminUser =  await User.create({username:'auditadminuser', password:'standardpswd'})
     await UserRole.create({user_id: adminUser.id, role_id: adminRole.id})
     const userToken = jwt.sign({user_id: adminUser.id}, process.env.TOKEN_SECRET)
 
@@ -36,9 +41,9 @@ describe('Authentication', () => {
   }
 
   describe('Test audit event creation', () => {
+
     it('Must create an audit event on database', async () =>{
-        const adminUser = await createAdminUser()
-        const userPayload = {username: 'Payload', password: 'anything', roles: ['standard']}
+        const userPayload = {username: 'Payload', password: 'anything', roles: [{id: standardRole.id, name: standardRole.name}]}
 
         const response = await request(app).post('/users').send(userPayload).set('Authorization', adminUser.token)
 
@@ -46,18 +51,17 @@ describe('Authentication', () => {
 
         const auditEvents = await AuditEvent.findAll({where:{entity_id: response.body.id}})
 
-        expect(auditEvents).toHaveLength(1)
+        expect(auditEvents.length).toBeGreaterThan(0)
     })
   })
 
   describe('Test audit event find all', () => {
     it('Must return 200 a list of objects', async () =>{
-        const adminUser = await createAdminUser()
 
         const response = await request(app).get('/audit_events').set('Authorization', adminUser.token)
 
         expect(response.status).toBe(200)
-        expect(response.body).toHaveLength(1)
+        expect(response.body.length).toBeGreaterThanOrEqual(1)
         expect(response.body[0]).toHaveProperty('id')
         expect(response.body[0]).toHaveProperty('entity')
         expect(response.body[0]).toHaveProperty('entity_id')

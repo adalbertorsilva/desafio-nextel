@@ -9,12 +9,16 @@ const HeroPower = require('../../models').HeroPower
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
-describe('super power', () => {
-  let standardRole
-  let adminRole
+describe('Super Power', () => {
+  let standardRole = {}
+  let adminRole = {}
+  let adminUser = {}
+  let standardUser = {}
   beforeAll(async () => {
-    standardRole = await Role.create({name: 'Standard'})
-    adminRole = await Role.create({name: 'Admin'})
+    standardRole = await Role.find({where: {name: 'Standard'}})
+    adminRole = await Role.find({where: {name: 'Admin'}})
+    adminUser = await createAdminUser()
+    standardUser = await createStandardUser()
   })
 
   const createStandardUser = async () => {
@@ -40,7 +44,6 @@ describe('super power', () => {
   describe('Test super power creation route', () => {
     it('Must return an 403 status if user is not Admin ', async () =>{
       
-        const standardUser = await createStandardUser()
         const powerPayload = { name: 'Spider insinct', description: 'Sense incoming threats' }
 
         const response = await request(app).post('/powers').send(powerPayload).set('Authorization', standardUser.token)
@@ -51,7 +54,6 @@ describe('super power', () => {
 
     it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
       
-      const adminUser =  await createAdminUser()
       const powerPayload = { name: 'Spider insinct', description: 'Sense incoming threats' }
 
       const response = await request(app).post('/powers').send(powerPayload).set('Authorization', adminUser.token)
@@ -68,10 +70,9 @@ describe('super power', () => {
   describe('Test super power find all route', () => {
     it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
       
-      const adminUser = await createAdminUser()
-      const response = await request(app).get('/powers').set('Authorization',  adminUser.token)
+      const response = await request(app).get(`/powers/${0}/${1}`).set('Authorization',  adminUser.token)
       expect(response.status).toBe(200)
-      expect(response.body).toHaveLength(1)
+      expect(response.body.length).toBe(1)
       expect(response.body[0]).toHaveProperty('id')
       expect(response.body[0]).toHaveProperty('name')
       expect(response.body[0]).toHaveProperty('description')
@@ -81,10 +82,9 @@ describe('super power', () => {
 
     it('Must return an 200 status and a fulfiled object if user is Standard ', async () =>{
       
-        const standardUser = await createStandardUser()
-        const response = await request(app).get('/powers').set('Authorization',  standardUser.token)
+        const response = await request(app).get(`/powers/${0}/${1}`).set('Authorization',  standardUser.token)
         expect(response.status).toBe(200)
-        expect(response.body).toHaveLength(1)
+        expect(response.body.length).toBe(1)
         expect(response.body[0]).toHaveProperty('id')
         expect(response.body[0]).toHaveProperty('name')
         expect(response.body[0]).toHaveProperty('description')
@@ -96,7 +96,6 @@ describe('super power', () => {
   describe('Test super power find one route', () => {
     it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
       
-      const adminUser = await createAdminUser()
 
       const powerPayload = { name: 'Spider insinct', description: 'Sense incoming threats' }
 
@@ -112,9 +111,6 @@ describe('super power', () => {
     })
 
     it('Must return an 200 status and a fulfiled object if user is Standard ', async () =>{
-      
-        const standardUser = await createStandardUser()
-        const adminUser = await createAdminUser()
 
         const powerPayload = { name: 'Spider insinct', description: 'Sense incoming threats' }
 
@@ -132,9 +128,6 @@ describe('super power', () => {
   describe('Test super power update route', () => {
 
     it('Must return an 403 status if user is not Admin ', async () =>{
-      
-        const standardUser = await createStandardUser()
-        const adminUser = await createAdminUser()
 
         const powerPayload = { name: 'Spider insinct', description: 'Sense incoming threats' }
 
@@ -147,7 +140,6 @@ describe('super power', () => {
 
     it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
       
-      const adminUser = await createAdminUser()
 
       const superPowerPayload = { name: 'Spider insinct', description: 'Sense incoming threats' }
       const superPowerUpdatePayload = { name: 'Spider web', description: 'Catch thiaves just like flies' }
@@ -168,9 +160,6 @@ describe('super power', () => {
   describe('Test super power delete route', () => {
 
     it('Must return an 403 status if user is not Admin ', async () =>{
-      
-      const standardUser = await createStandardUser()
-      const adminUser = await createAdminUser()
 
       const powerPayload = { name: 'Spider insinct', description: 'Sense incoming threats' }
 
@@ -182,8 +171,6 @@ describe('super power', () => {
     })
 
     it('Must return an 403 status if it has a super hero binded', async () =>{
-      
-      const adminUser = await createAdminUser()
 
       const heroPayload = { 
         name: 'Spiderman', 
@@ -206,8 +193,6 @@ describe('super power', () => {
     })
 
     it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
-      
-      const adminUser = await createAdminUser()
 
       const powerPayload = { name: 'Spider insinct', description: 'Sense incoming threats' }
 

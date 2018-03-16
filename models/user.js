@@ -3,26 +3,27 @@
 const {Model, DataTypes} = require('sequelize')
 const bcrypt = require('bcrypt-nodejs')
 const autoBind = require('auto-bind')
-const Role = require('./role')
 
 module.exports = (sequelize) => {
   class User extends Model {
+
     static init (sequelize) {
       return super.init({
         username: DataTypes.STRING,
         password: DataTypes.STRING
-      }, {sequelize, underscored: true})
+      }, {sequelize, 
+          underscored: true,
+          hooks: {
+            beforeCreate: User.beforeCreate,
+            beforeUpdate: User.beforeUpdate
+          }
+        })
     }
 
     generatePasswordHash (password) {
       const salt = bcrypt.genSaltSync()
-
-      if (password) {
-        return bcrypt.hashSync(password, salt)
-      } else {
-        this.password = bcrypt.hashSync(this.password, salt)
-        return this.password
-      }
+      this.password = bcrypt.hashSync(this.password, salt)
+      return this.password
     }
 
     validatePassword (password) {
@@ -34,19 +35,30 @@ module.exports = (sequelize) => {
      return isAdmin ? true : false
     }
 
-    responseObject () {
+    async responseObject () {
+
+      const roles = await this.getRoles()
+
       const responseObject = {
         id: this.id,
         username: this.username,
         password: this.password,
-        roles: this.roles
+        roles: roles.map(role => role.responseObject())
       }
 
       return responseObject
     }
 
     static associate (models) {
-      this.belongsToMany(models.Role, { through: 'UserRoles', onDelete: 'CASCADE', as: 'roles', foreignKey: 'user_id' })
+      this.belongsToMany(models.Role, { through: 'UserRoles', as: 'roles', foreignKey: 'user_id', onUpdate: 'CASCADE', onDelete: 'CASCADE' })
+    }
+
+    static beforeCreate (model) {
+      model.generatePasswordHash()
+    }
+
+    static beforeUpdate (model) {
+      model.generatePasswordHash()
     }
   }
 

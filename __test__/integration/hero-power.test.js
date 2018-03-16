@@ -10,22 +10,15 @@ const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
 describe('Super Hero Powers', () => {
-  let standardRole
-  let adminRole
+  let standardRole = {}
+  let adminRole = {}
+  let adminUser = {}
+  let standardUser = {}
   beforeAll(async () => {
-    standardRole = await Role.create({name: 'Standard'})
-    adminRole = await Role.create({name: 'Admin'})
+    standardRole = await Role.find({where: {name: 'Standard'}})
+    adminRole = await Role.find({where: {name: 'Admin'}})
+    adminUser = await createAdminUser()
   })
-
-  const createStandardUser = async () => {
-    const standardUser = await User.create({username: 'standarduser', password: 'standardpassword'})
-    await UserRole.create({user_id: standardUser.id, role_id: standardRole.id})
-    const userToken = jwt.sign({user_id: standardUser.id}, process.env.TOKEN_SECRET)
-
-    standardUser.token = userToken
-
-    return standardUser
-  }
 
   const createAdminUser = async () => {
     const adminUser =  await User.create({username:'adminuser', password:'standardpswd'})
@@ -41,7 +34,6 @@ describe('Super Hero Powers', () => {
 
     it('Must return an 200 status and a fulfiled object with powers attribute ', async () =>{
       
-      const adminUser =  await createAdminUser()
       const power = await SuperPower.create({ name: 'Spider insinct', description: 'Sense incoming threats' })
       const heroPayload = { 
           name: 'Spiderman', 
@@ -79,10 +71,9 @@ describe('Super Hero Powers', () => {
   describe('Test super hero find all route', () => {
     it('Must return an 200 status and a fulfiled object with powers attribute ', async () =>{
       
-      const adminUser = await createAdminUser()
-      const response = await request(app).get('/heroes').set('Authorization',  adminUser.token)
+      const response = await request(app).get(`/heroes/${0}/${1}`).set('Authorization',  adminUser.token)
       expect(response.status).toBe(200)
-      expect(response.body).toHaveLength(1)
+      expect(response.body.length).toBeGreaterThanOrEqual(1)
       expect(response.body[0]).toHaveProperty('id')
       expect(response.body[0]).toHaveProperty('name')
       expect(response.body[0]).toHaveProperty('alias')
@@ -95,7 +86,7 @@ describe('Super Hero Powers', () => {
       expect(response.body[0].area).not.toHaveProperty('created_at')
       expect(response.body[0].area).not.toHaveProperty('updated_at')
       expect(response.body[0]).toHaveProperty('powers')
-      expect(response.body[0].powers).toHaveLength(1)
+      expect(response.body[0].powers.length).toBeGreaterThanOrEqual(1)
       expect(response.body[0].powers[0]).toHaveProperty('name')
       expect(response.body[0].powers[0]).toHaveProperty('description')
     })
@@ -104,7 +95,6 @@ describe('Super Hero Powers', () => {
   describe('Test super hero find one route', () => {
     it('Must return an 200 status and a fulfiled object with powers attribute ', async () =>{
       
-      const adminUser = await createAdminUser()
       const power = await SuperPower.create({ name: 'Spider insinct', description: 'Sense incoming threats' })
       const heroPayload = { 
           name: 'Spiderman', 
@@ -142,7 +132,6 @@ describe('Super Hero Powers', () => {
   describe('Test hero update route', () => {
     it('Must return an 200 status and a fulfiled object with powers attribute ', async () =>{
       
-      const adminUser = await createAdminUser()
       const power = await SuperPower.create({ name: 'Spider insinct', description: 'Sense incoming threats' })
       const vilainPower = await SuperPower.create({ name: 'Symbionte', description: 'Expands physical power' })
 
@@ -194,8 +183,6 @@ describe('Super Hero Powers', () => {
   describe('Test super hero delete route', () => {
 
     it('Must return an 200 status and a fulfiled object with powers attribute ', async () =>{
-      
-      const adminUser = await createAdminUser()
 
       const heroPayload = { 
         name: 'Spiderman', 

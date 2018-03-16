@@ -9,18 +9,21 @@ require('dotenv').config()
 describe('User', () => {
   let standardRole = {}
   let adminRole = {}
+  let adminUser = {}
+  let standardUser = {}
   beforeAll(async () => {
-    standardRole = await Role.create({name: 'Standard'})
-    adminRole = await Role.create({name: 'Admin'})
+    standardRole = await Role.find({where: {name: 'Standard'}})
+    adminRole = await Role.find({where: {name: 'Admin'}})
+    adminUser = await createAdminUser()
+    standardUser = await createStandardUser()
   })
 
   const createStandardUser = async () => {
-    const standardUser = await User.create({username: 'standarduser', password: 'standardpassword'})
+    const standardUser = await User.create({username:'standarduser', password:'standardpassword'})
     await UserRole.create({user_id: standardUser.id, role_id: standardRole.id})
     const userToken = jwt.sign({user_id: standardUser.id}, process.env.TOKEN_SECRET)
 
     standardUser.token = userToken
-
     return standardUser
   }
 
@@ -35,21 +38,19 @@ describe('User', () => {
   }
 
   describe('Test user creation route', () => {
-    it('Must return an 403 status if user is not Admin ', async () =>{
-      
-        const standardUser = await createStandardUser()
-        const userPayload = {username: 'Payload', password: 'anything'}
+    it('Must return an 403 status if user is not Admin ', async () => {
 
-        const response = await request(app).post('/users').send(userPayload).set('Authorization', standardUser.token)
+      const userPayload = {username: 'Payload', password: 'anything'}
 
-        expect(response.status).toBe(403)
-        expect(response.body).toHaveProperty('message', "User doesn't have permition do this action")
+      const response = await request(app).post('/users').send(userPayload).set('Authorization', standardUser.token)
+
+      expect(response.status).toBe(403)
+      expect(response.body).toHaveProperty('message', "User doesn't have permition do this action")
     })
 
     it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
       
-      const adminUser =  await createAdminUser()
-      const userPayload = {username: 'Payload', password: 'anything', roles: ['standard']}
+      const userPayload = {username: 'Payload', password: 'anything'}
       const response = await request(app).post('/users').send(userPayload).set('Authorization', adminUser.token)
 
       expect(response.status).toBe(200)
@@ -58,45 +59,31 @@ describe('User', () => {
       expect(response.body).toHaveProperty('username', userPayload.username)
       expect(response.body).toHaveProperty('password')
       expect(response.body.password).not.toEqual(userPayload.password)
-      expect(response.body).toHaveProperty('roles')
-      expect(response.body.roles).toHaveLength(1)
-
-      const userRoles = await UserRole.findAll({where: {user_id: response.body.id}})
-
-      expect(userRoles).toHaveLength(1)
     })
   })
 
   describe('Test user find all route', () => {
 
     it('Must return an 403 status if user is not Admin ', async () =>{
-      
-      const standardUser = await createStandardUser()
 
-      const response = await request(app).get('/users').set('Authorization', standardUser.token)
+      const response = await request(app).get(`/users/${0}/${2}`).set('Authorization', standardUser.token)
 
       expect(response.status).toBe(403)
       expect(response.body).toHaveProperty('message', "User doesn't have permition do this action")
   })
 
     it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
-      
-      const adminUser =  await User.create({username:'adminuser', password:'standardpswd'})
-      await UserRole.create({user_id: adminUser.id, role_id: adminRole.id})
-      const userToken = jwt.sign({user_id: adminUser.id}, process.env.TOKEN_SECRET)
 
-      const response = await request(app).get('/users').set('Authorization', userToken)
+      const response = await request(app).get(`/users/${0}/${2}`).set('Authorization', adminUser.token)
 
       expect(response.status).toBe(200)
-      expect(response.body).toHaveLength(5)
+      expect(response.body).toHaveLength(2)
     })
   })
 
   describe('Test user update route', () => {
 
     it('Must return an 403 status if user is not Admin ', async () =>{
-      
-      const standardUser = await createStandardUser()
 
       const response = await request(app).put(`/users/${standardUser.id}`).send({}).set('Authorization', standardUser.token)
 
@@ -105,34 +92,27 @@ describe('User', () => {
   })
 
     it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
-      
-      const adminUser =  await User.create({username:'adminuser', password:'standardpswd'})
-      await UserRole.create({user_id: adminUser.id, role_id: adminRole.id})
-      const userToken = jwt.sign({user_id: adminUser.id}, process.env.TOKEN_SECRET)
-      const userPayload = {username: 'Payload2', password: 'anything', roles: ['standard', 'admin']}
 
-      const response = await request(app).put(`/users/${adminUser.id}`).send(userPayload).set('Authorization', userToken)
+      const userPayload = {username: 'Payload', password: 'anything', bla: true}
+      const userUpdatePayload = {username: 'Other Payload', password: 'something'}
+
+      const userResponse = await request(app).post('/users').send(userPayload).set('Authorization', adminUser.token)
+      const response = await request(app).put(`/users/${userResponse.body.id}`).send(userUpdatePayload).set('Authorization', adminUser.token)
 
       expect(response.status).toBe(200)
       expect(response.body).toHaveProperty('id')
       expect(response.body.id).not.toBeNull()
-      expect(response.body).toHaveProperty('username', userPayload.username)
+      expect(response.body).toHaveProperty('username', userUpdatePayload.username)
       expect(response.body).toHaveProperty('password')
-      expect(response.body).toHaveProperty('roles')
-      expect(response.body.roles).toHaveLength(2)
-
-      const userRoles = await UserRole.findAll({where: {user_id: response.body.id}})
-
-      expect(userRoles).toHaveLength(2)
-      
+      expect(response.body.password).not.toEqual(userUpdatePayload.password)
+      expect(response.body).not.toHaveProperty('created_at')
+      expect(response.body).not.toHaveProperty('updated_at')
     })
   })
 
   describe('Test user find one route', () => {
 
     it('Must return an 403 status if user is not Admin ', async () =>{
-        
-      const standardUser = await createStandardUser()
 
       const response = await request(app).get(`/users/${standardUser.id}`).set('Authorization', standardUser.token)
 
@@ -141,27 +121,20 @@ describe('User', () => {
     })
 
     it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
-      
-      const adminUser =  await User.create({username:'adminuser', password:'standardpswd'})
-      await UserRole.create({user_id: adminUser.id, role_id: adminRole.id})
-      const userToken = jwt.sign({user_id: adminUser.id}, process.env.TOKEN_SECRET)
 
-      const response = await request(app).get(`/users/${adminUser.id}`).set('Authorization', userToken)
+      const response = await request(app).get(`/users/${adminUser.id}`).set('Authorization', adminUser.token)
+      
       expect(response.status).toBe(200)
       expect(response.body).toHaveProperty('id')
       expect(response.body.id).not.toBeNull()
       expect(response.body).toHaveProperty('username', adminUser.username)
       expect(response.body).toHaveProperty('password')
-      expect(response.body).toHaveProperty('roles')
-      expect(response.body.roles).toHaveLength(1)
     })
   })
 
   describe('Test user delete route', () => {
 
     it('Must return an 403 status if user is not Admin ', async () =>{
-        
-      const standardUser = await createStandardUser()
 
       const response = await request(app).delete(`/users/${standardUser.id}`).set('Authorization', standardUser.token)
 
@@ -170,17 +143,11 @@ describe('User', () => {
     })
 
     it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
-      
-      const adminUser =  await User.create({username:'adminuser', password:'standardpswd'})
-      await UserRole.create({user_id: adminUser.id, role_id: adminRole.id})
-      const userToken = jwt.sign({user_id: adminUser.id}, process.env.TOKEN_SECRET)
 
-      const response = await request(app).delete(`/users/${adminUser.id}`).set('Authorization', userToken)
+      const response = await request(app).delete(`/users/${adminUser.id}`).set('Authorization', adminUser.token)
+
       expect(response.status).toBe(200)
       expect(response.body).toHaveProperty('message', 'User removed')
-
-      const userRoles = await UserRole.findAll({where: {user_id: adminUser.id}})
-      expect(userRoles).toHaveLength(0)
     })
   })
 })

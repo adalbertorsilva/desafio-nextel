@@ -9,12 +9,12 @@ class SuperPowerController extends BaseController {
 
   async create (req, res, next) {
     const powerResponse = await SuperPower.create(req.body)
-    this.configRequestBypass(req, powerResponse)
+    await this.configRequestBypass(req, powerResponse)
     next()
   }
 
   async findAll (req, res) {
-    const powers = await SuperPower.findAll()
+    const powers = await SuperPower.findAll({ offset: req.params.offset, limit: req.params.limit })
     res.status(200).send(powers.map(power => power.responseObject()))
   }
 
@@ -26,7 +26,7 @@ class SuperPowerController extends BaseController {
   async update (req, res, next) {
     const power = await SuperPower.findById(req.params.id)
     const updatedPower = await power.updateAttributes(req.body)
-    this.configRequestBypass(req, updatedPower)
+    await this.configRequestBypass(req, updatedPower)
     next()
   }
 
@@ -39,7 +39,7 @@ class SuperPowerController extends BaseController {
     }
 
     await SuperPower.destroy({where:{id: req.params.id}})
-    this.configRequestBypass(req, power, {message: 'Super power removed'})
+    await this.configRequestBypass(req, power, {message: 'Super power removed'})
     next()
   }
 }

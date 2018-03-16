@@ -10,6 +10,7 @@ class AuthenticationController {
   }
 
   async handleAuthentication (req, res) {
+
     const user = await User.find({where: {username: req.body.username}})
 
     if (user === null) {

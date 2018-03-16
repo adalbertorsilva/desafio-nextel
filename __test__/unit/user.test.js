@@ -6,7 +6,8 @@ describe('User', () => {
         const password = 'supersecret'
         const user = new User()
         user.username = 'John Doe'
-        user.password = user.generatePasswordHash(password)
+        user.password = password
+        user.generatePasswordHash()
 
         expect(user.password).not.toBe(password)
     })
@@ -16,7 +17,8 @@ describe('User', () => {
         const password = 'supersecret' 
         const user = new User()
         user.username = 'John Doe'
-        user.password = user.generatePasswordHash(password)
+        user.password = password
+        user.generatePasswordHash()
         expect(user.validatePassword(password)).toBeTruthy()
     })
   })

@@ -13,12 +13,12 @@ class SuperHeroController extends BaseController{
   async create (req, res, next) {
     const heroResponse = await SuperHero.create(req.body, {include:[{ model: ProtectionArea, as:'area' }]})
     await heroResponse.setPowers(this.getHeroPowers(req))
-    this.configRequestBypass(req, heroResponse)
+    await this.configRequestBypass(req, heroResponse)
     next()
   }
 
   async findAll (req, res) {
-    const heroes = await SuperHero.findAll({include:[{ model: ProtectionArea, as:'area' }]})
+    const heroes = await SuperHero.findAll({include:[{ model: ProtectionArea, as:'area' }], offset: req.params.offset, limit: req.params.limit },)
     const heroesResponse = await Promise.all(heroes.map(async hero => await this.getResponseObject(hero)))
     res.status(200).send(heroesResponse)
   }
@@ -29,17 +29,18 @@ class SuperHeroController extends BaseController{
   }
 
   async update (req, res, next) {
-    const hero = await SuperHero.findById(req.params.id, {include:[{ model: ProtectionArea, as:'area' }, { model: SuperPower, as:'powers' }]})
+    const hero = await SuperHero.findById(req.params.id, {include:[{ model: ProtectionArea, as:'area' }]})
     await hero.setPowers(this.getHeroPowers(req))
     const updatedHero = await hero.updateAttributes(req.body)
-    this.configRequestBypass(req, updatedHero)
+    await this.configRequestBypass(req, updatedHero)
     next()
   }
 
   async delete (req, res, next) {
     const hero = await SuperHero.findById(req.params.id)  
+    hero.setPowers([])
     await SuperHero.destroy({where:{id: req.params.id}})
-    this.configRequestBypass(req, hero, {message: 'Super hero removed'})
+    await this.configRequestBypass(req, hero, {message: 'Super hero removed'})
     next()
   }
 

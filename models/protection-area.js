@@ -22,6 +22,15 @@ module.exports = (sequelize) => {
 
       return responseObject
     }
+
+    static associate (models) {
+      this.belongsTo(models.SuperHero, {as: 'hero', foreignKey: 'super_hero_id'})
+    }
+
+    static async findNotifiedAreas(coordinates) {
+      return await sequelize.query('SELECT * FROM "ProtectionAreas" WHERE ST_DWithin(point::geography, ST_MakePoint(:longitude,:latitude)::geography, 10000) limit 8', { replacements: { longitude: coordinates.longitude, latitude: coordinates.latitude }, model: ProtectionArea})
+    }
   }
   return ProtectionArea;
+
 };

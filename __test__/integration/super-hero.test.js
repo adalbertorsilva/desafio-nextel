@@ -7,12 +7,16 @@ const SuperHero = require('../../models').SuperHero
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
-describe('SUper Hero', () => {
-  let standardRole
-  let adminRole
+describe('Super Hero', () => {
+  let standardRole = {}
+  let adminRole = {}
+  let adminUser = {}
+  let standardUser = {}
   beforeAll(async () => {
-    standardRole = await Role.create({name: 'Standard'})
-    adminRole = await Role.create({name: 'Admin'})
+    standardRole = await Role.find({where: {name: 'Standard'}})
+    adminRole = await Role.find({where: {name: 'Admin'}})
+    adminUser = await createAdminUser()
+    standardUser = await createStandardUser()
   })
 
   const createStandardUser = async () => {
@@ -36,9 +40,8 @@ describe('SUper Hero', () => {
   }
 
   describe('Test hero creation route', () => {
-    it('Must return an 403 status if user is not Admin ', async () =>{
+    it('Must return an 403 status if user is not Admin ', async () => {
       
-        const standardUser = await createStandardUser()
         const heroPayload = { name: 'Spiderman', alias: 'Peter Parker' }
 
         const response = await request(app).post('/heroes').send(heroPayload).set('Authorization', standardUser.token)
@@ -47,9 +50,8 @@ describe('SUper Hero', () => {
         expect(response.body).toHaveProperty('message', "User doesn't have permition do this action")
     })
 
-    it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
+    it('Must return an 200 status and a fulfiled object if user is Admin ', async () => {
       
-      const adminUser =  await createAdminUser()
       const heroPayload = { 
           name: 'Spiderman', 
           alias: 'Peter Parker', 
@@ -79,12 +81,11 @@ describe('SUper Hero', () => {
   })
 
   describe('Test super hero find all route', () => {
-    it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
+    it('Must return an 200 status and a fulfiled object if user is Admin ', async () => {
       
-      const adminUser = await createAdminUser()
-      const response = await request(app).get('/heroes').set('Authorization',  adminUser.token)
+      const response = await request(app).get(`/heroes/${0}/${1}`).set('Authorization',  adminUser.token)
       expect(response.status).toBe(200)
-      expect(response.body).toHaveLength(1)
+      expect(response.body.length).toBe(1)
       expect(response.body[0]).toHaveProperty('id')
       expect(response.body[0]).toHaveProperty('name')
       expect(response.body[0]).toHaveProperty('alias')
@@ -98,12 +99,11 @@ describe('SUper Hero', () => {
       expect(response.body[0].area).not.toHaveProperty('updated_at')
     })
 
-    it('Must return an 200 status and a fulfiled object if user is Standard ', async () =>{
+    it('Must return an 200 status and a fulfiled object if user is Standard ', async () => {
       
-        const standardUser = await createStandardUser()
-        const response = await request(app).get('/heroes').set('Authorization',  standardUser.token)
+        const response = await request(app).get(`/heroes/${0}/${1}`).set('Authorization',  standardUser.token)
         expect(response.status).toBe(200)
-        expect(response.body).toHaveLength(1)
+        expect(response.body.length).toBe(1)
         expect(response.body[0]).toHaveProperty('id')
         expect(response.body[0]).toHaveProperty('name')
         expect(response.body[0]).toHaveProperty('alias')
@@ -119,9 +119,7 @@ describe('SUper Hero', () => {
   })
 
   describe('Test super hero find one route', () => {
-    it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
-      
-      const adminUser = await createAdminUser()
+    it('Must return an 200 status and a fulfiled object if user is Admin ', async () => {
 
       const heroPayload = { 
           name: 'Spiderman', 
@@ -150,10 +148,7 @@ describe('SUper Hero', () => {
       expect(response.body.area).not.toHaveProperty('updated_at')
     })
 
-    it('Must return an 200 status and a fulfiled object if user is Standard ', async () =>{
-      
-        const standardUser = await createStandardUser()
-        const adminUser = await createAdminUser()
+    it('Must return an 200 status and a fulfiled object if user is Standard ', async () => {
 
         const heroPayload = { 
             name: 'Spiderman', 
@@ -184,10 +179,7 @@ describe('SUper Hero', () => {
 
   describe('Test hero update route', () => {
 
-    it('Must return an 403 status if user is not Admin ', async () =>{
-      
-        const standardUser = await createStandardUser()
-        const adminUser = await createAdminUser()
+    it('Must return an 403 status if user is not Admin ', async () => {
 
         const heroPayload = { 
             name: 'Spiderman', 
@@ -206,9 +198,7 @@ describe('SUper Hero', () => {
         expect(response.body).toHaveProperty('message', "User doesn't have permition do this action")
     })
 
-    it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
-      
-      const adminUser = await createAdminUser()
+    it('Must return an 200 status and a fulfiled object if user is Admin ', async () => {
 
       const heroPayload = { 
         name: 'Spiderman', 
@@ -251,10 +241,7 @@ describe('SUper Hero', () => {
 
   describe('Test hero delete route', () => {
 
-    it('Must return an 403 status if user is not Admin ', async () =>{
-      
-        const standardUser = await createStandardUser()
-        const adminUser = await createAdminUser()
+    it('Must return an 403 status if user is not Admin ', async () => {
 
         const heroPayload = { 
             name: 'Spiderman', 
@@ -273,9 +260,7 @@ describe('SUper Hero', () => {
         expect(response.body).toHaveProperty('message', "User doesn't have permition do this action")
     })
 
-    it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
-      
-      const adminUser = await createAdminUser()
+    it('Must return an 200 status and a fulfiled object if user is Admin ', async () => {
 
       const heroPayload = { 
         name: 'Spiderman', 

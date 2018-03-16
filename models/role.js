@@ -11,6 +11,7 @@ module.exports = (sequelize) => {
 
     responseObject () {
       const responseObject = {
+        id: this.id,
         name: this.name
       }
 
@@ -18,7 +19,7 @@ module.exports = (sequelize) => {
     }
 
     static associate (models) {
-      this.belongsToMany(models.User, {through: 'UserRole'})
+      this.belongsToMany(models.User, { through: 'UserRoles', onDelete: 'CASCADE', as: 'users', foreignKey: 'role_id' })
     }
   }
 

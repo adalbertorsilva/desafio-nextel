@@ -13,6 +13,11 @@
     "hero",
     "nextel"
   ],
+  "jest": {
+    "setupFiles": [
+      "./setup-test.js"
+    ]
+  },
   "author": "Adalberto Júnior",
   "license": "ISC",
   "dependencies": {
