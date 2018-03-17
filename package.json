@@ -7,7 +7,9 @@
     "test": "NODE_ENV=test sequelize db:migrate; jest --forceExit --verbose",
     "start-dev": "nodemon /bin/server.js",
     "start": "node bin/server.js",
-    "build": "echo ok ok ok ok ok"
+    "build": "npm run build:dependencies && npm run build:database && NODE_ENV=production npm start",
+    "build:dependencies": "npm install",
+    "build:database": "NODE_ENV=production sequelize db:create; NODE_ENV=production sequelize db:migrate; NODE_ENV=production sequelize db:seed:all"
   },
   "keywords": [
     "super",
