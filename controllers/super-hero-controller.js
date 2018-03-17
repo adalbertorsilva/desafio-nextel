@@ -101,6 +101,11 @@ class SuperHeroController extends BaseController{
     next()
   }
 
+  /**
+   * create an array of ids from an array of powers
+   * 
+   * @param req - http request
+   */
   getHeroPowers (req) {
     return req.body.powers ? req.body.powers.map(power => power.id) : []
   }
