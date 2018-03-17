@@ -9,18 +9,13 @@
     "start": "node bin/server.js",
     "build": "npm run build:dependencies && npm run build:database && NODE_ENV=production npm start",
     "build:dependencies": "npm install",
-    "build:database": "NODE_ENV=production sequelize db:create; NODE_ENV=production sequelize db:migrate; NODE_ENV=production sequelize db:seed:all"
+    "build:database": "sequelize db:create; sequelize db:migrate; sequelize db:seed:all"
   },
   "keywords": [
     "super",
     "hero",
     "nextel"
   ],
-  "jest": {
-    "setupFiles": [
-      "./setup-test.js"
-    ]
-  },
   "author": "Adalberto Júnior",
   "license": "ISC",
   "dependencies": {

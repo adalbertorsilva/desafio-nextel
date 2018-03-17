@@ -1,6 +1,12 @@
 'use strict'
 const {Model, DataTypes} = require('sequelize')
 
+/**
+ * class that represents the
+ * join table between user and role
+ * 
+ * @class
+ */
 module.exports = (sequelize) => {
   class UserRole extends Model {
     static init (sequelize) {

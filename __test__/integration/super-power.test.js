@@ -75,6 +75,16 @@ describe('Super Power', () => {
       expect(response.status).toBe(403)
       expect(response.body).toHaveProperty('message', "Super Power already exists")
     })
+
+    it('Must return an 403 status and a fulfiled object with an error message is name is empty ', async () =>{
+      
+      const powerPayload = { name: '', description: 'Catch thieves just like flies' }
+
+      const response = await request(app).post('/powers').send(powerPayload).set('Authorization', adminUser.token)
+
+      expect(response.status).toBe(403)
+      expect(response.body).toHaveProperty('message', "Super Power can not be empty")
+    })
   })
 
   describe('Test super power find all route', () => {
@@ -164,6 +174,32 @@ describe('Super Power', () => {
       expect(response.body).toHaveProperty('description', superPowerUpdatePayload.description)
       expect(response.body).not.toHaveProperty('created_at')
       expect(response.body).not.toHaveProperty('updated_at')
+    })
+
+    it('Must return an 403 status and a fulfiled object with an error message ', async () =>{
+
+      const somePower = { name: 'some power', description: "some power" }
+      const otherPower = { name: 'other power', description: "other power" }
+      const superPowerUpdatePayload = { name: 'other power', description: 'third power' }
+
+      await request(app).post('/powers').send(otherPower).set('Authorization', adminUser.token)
+      const superPowerResponse = await request(app).post('/powers').send(somePower).set('Authorization', adminUser.token)
+      const response = await request(app).put(`/powers/${superPowerResponse.body.id}`).send(superPowerUpdatePayload).set('Authorization', adminUser.token)
+
+      expect(response.status).toBe(403)
+      expect(response.body).toHaveProperty('message', "Super Power already exists")
+    })
+
+    it('Must return an 403 status and a fulfiled object with an error message ', async () =>{
+
+      const power = { name: 'new power', description: "some power" }
+      const powerUpdatePayload = { name: '', description: 'third power' }
+
+      const superPowerResponse = await request(app).post('/powers').send(power).set('Authorization', adminUser.token)
+      const response = await request(app).put(`/powers/${superPowerResponse.body.id}`).send(powerUpdatePayload).set('Authorization', adminUser.token)
+
+      expect(response.status).toBe(403)
+      expect(response.body).toHaveProperty('message', "Super Power can not be empty")
     })
   })
 

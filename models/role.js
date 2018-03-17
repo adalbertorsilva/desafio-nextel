@@ -1,6 +1,12 @@
 'use strict'
 const {Model, DataTypes} = require('sequelize')
 
+/**
+ * class that represents the role
+ * entity
+ * 
+ * @class
+ */
 module.exports = (sequelize) => {
   class Role extends Model {
     static init (sequelize) {
@@ -9,6 +15,9 @@ module.exports = (sequelize) => {
       }, {sequelize, underscored: true})
     }
 
+    /**
+     * creates an object to be sent as response
+     */
     responseObject () {
       const responseObject = {
         id: this.id,

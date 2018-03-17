@@ -1,6 +1,12 @@
 'use strict'
 const {Model, DataTypes} = require('sequelize')
 
+/**
+ * class that represents the
+ * super hero entity
+ * 
+ * @class
+ */
 module.exports = (sequelize) => {
   class SuperHero extends Model {
     static init (sequelize) {
@@ -10,6 +16,9 @@ module.exports = (sequelize) => {
       }, {sequelize, underscored: true})
     }
 
+    /**
+     * creates an object to be sent as response
+     */
     async responseObject () {
 
       const powers = await this.getPowers()

@@ -56,7 +56,7 @@ describe('Super Hero', () => {
           name: 'Superman', 
           alias: 'Clark Kent', 
           area: {
-            name: 'Metripolis',
+            name: 'Metropolis',
             point: { type: 'Point', coordinates: [40.671725,-73.945351]},
             radius: 8.5
           }
@@ -85,7 +85,7 @@ describe('Super Hero', () => {
           name: 'Superman', 
           alias: 'Clark Kent', 
           area: {
-            name: 'Metripolis',
+            name: 'Metropolis',
             point: { type: 'Point', coordinates: [40.671725,-73.945351]},
             radius: 8.5
           }
@@ -94,7 +94,43 @@ describe('Super Hero', () => {
       const response = await request(app).post('/heroes').send(heroPayload).set('Authorization', adminUser.token)
 
       expect(response.status).toBe(403)
-      expect(response.body).toHaveProperty('message', "Super hero already exists")
+      expect(response.body).toHaveProperty('message', "Super Hero or Protection Area already exists")
+    })
+
+    it('Must return an 403 status and a fulfiled object with an error message when hero name is empty', async () => {
+      
+      const heroPayload = { 
+          name: '', 
+          alias: 'Clark Kent', 
+          area: {
+            name: 'Small Vile',
+            point: { type: 'Point', coordinates: [40.671725,-73.945351]},
+            radius: 8.5
+          }
+        }
+
+      const response = await request(app).post('/heroes').send(heroPayload).set('Authorization', adminUser.token)
+
+      expect(response.status).toBe(403)
+      expect(response.body).toHaveProperty('message', "Super Hero or Protection Area can not be empty")
+    })
+
+    it('Must return an 403 status and a fulfiled object with an error message when area name is empty', async () => {
+      
+      const heroPayload = { 
+          name: 'Return Of Superman', 
+          alias: 'Clark Kent', 
+          area: {
+            name: '',
+            point: { type: 'Point', coordinates: [40.671725,-73.945351]},
+            radius: 8.5
+          }
+        }
+
+      const response = await request(app).post('/heroes').send(heroPayload).set('Authorization', adminUser.token)
+
+      expect(response.status).toBe(403)
+      expect(response.body).toHaveProperty('message', "Super Hero or Protection Area can not be empty")
     })
   })
 
@@ -254,6 +290,144 @@ describe('Super Hero', () => {
       expect(response.body.area).toHaveProperty('radius', heroUpdatePayload.area.radius)
       expect(response.body.area).not.toHaveProperty('created_at')
       expect(response.body.area).not.toHaveProperty('updated_at')
+    })
+
+    it('Must return an 403 status and a fulfiled object with an error message ', async () => {
+
+      const heroPayload = { 
+        name: 'some hero', 
+        alias: 'some name ', 
+        area: {
+            name: 'some place',
+            point: { type: 'Point', coordinates: [40.671725,-73.945351]},
+            radius: 8.5
+        }
+      }
+
+      const otherHeroPayload = { 
+        name: 'other hero', 
+        alias: 'other name ', 
+        area: {
+            name: 'other place',
+            point: { type: 'Point', coordinates: [40.671725,-73.945351]},
+            radius: 8.5
+        }
+      }
+
+      const heroUpdatePayload = { 
+        name: 'other hero', 
+        alias: 'Arthur Curry II', 
+        area: {
+            name: 'Atlantis',
+            point: { type: 'Point', coordinates: [40.671725,-73.945351]},
+            radius: 6
+        }
+      }
+
+      await request(app).post('/heroes').send(otherHeroPayload).set('Authorization', adminUser.token)
+      const heroResponse = await request(app).post('/heroes').send(heroPayload).set('Authorization', adminUser.token)
+      const response = await request(app).put(`/heroes/${heroResponse.body.id}`).send(heroUpdatePayload).set('Authorization', adminUser.token)
+
+      expect(response.status).toBe(403)
+      expect(response.body).toHaveProperty('message', "Super Hero or Protection Area already exists")
+    })
+
+    it('Must return an 403 status and a fulfiled object with an error message ', async () => {
+
+      const heroPayload = { 
+        name: 'a hero', 
+        alias: 'some name ', 
+        area: {
+            name: 'a place',
+            point: { type: 'Point', coordinates: [40.671725,-73.945351]},
+            radius: 8.5
+        }
+      }
+
+      const otherHeroPayload = { 
+        name: 'another hero', 
+        alias: 'other name ', 
+        area: {
+            name: 'another place',
+            point: { type: 'Point', coordinates: [40.671725,-73.945351]},
+            radius: 8.5
+        }
+      }
+
+      const heroUpdatePayload = { 
+        name: 'a different name', 
+        alias: 'Arthur Curry II', 
+        area: {
+            name: 'another place',
+            point: { type: 'Point', coordinates: [40.671725,-73.945351]},
+            radius: 6
+        }
+      }
+
+      await request(app).post('/heroes').send(otherHeroPayload).set('Authorization', adminUser.token)
+      const heroResponse = await request(app).post('/heroes').send(heroPayload).set('Authorization', adminUser.token)
+      const response = await request(app).put(`/heroes/${heroResponse.body.id}`).send(heroUpdatePayload).set('Authorization', adminUser.token)
+
+      expect(response.status).toBe(403)
+      expect(response.body).toHaveProperty('message', "Super Hero or Protection Area already exists")
+    })
+
+    it('Must return an 403 status and a fulfiled object with an error message when hero name is empty', async () => {
+
+      const heroPayload = { 
+        name: 'my hero', 
+        alias: 'some name ', 
+        area: {
+            name: 'my place',
+            point: { type: 'Point', coordinates: [40.671725,-73.945351]},
+            radius: 8.5
+        }
+      }
+
+      const heroUpdatePayload = { 
+        name: '', 
+        alias: 'Arthur Curry II', 
+        area: {
+            name: 'empty place',
+            point: { type: 'Point', coordinates: [40.671725,-73.945351]},
+            radius: 6
+        }
+      }
+
+      const heroResponse = await request(app).post('/heroes').send(heroPayload).set('Authorization', adminUser.token)
+      const response = await request(app).put(`/heroes/${heroResponse.body.id}`).send(heroUpdatePayload).set('Authorization', adminUser.token)
+
+      expect(response.status).toBe(403)
+      expect(response.body).toHaveProperty('message', "Super Hero or Protection Area can not be empty")
+    })
+
+    it('Must return an 403 status and a fulfiled object with an error message when area name is empty', async () => {
+
+      const heroPayload = { 
+        name: 'strange hero', 
+        alias: 'some name ', 
+        area: {
+            name: 'strange place',
+            point: { type: 'Point', coordinates: [40.671725,-73.945351]},
+            radius: 8.5
+        }
+      }
+
+      const heroUpdatePayload = { 
+        name: 'nice hero', 
+        alias: 'Arthur Curry II', 
+        area: {
+            name: '',
+            point: { type: 'Point', coordinates: [40.671725,-73.945351]},
+            radius: 6
+        }
+      }
+
+      const heroResponse = await request(app).post('/heroes').send(heroPayload).set('Authorization', adminUser.token)
+      const response = await request(app).put(`/heroes/${heroResponse.body.id}`).send(heroUpdatePayload).set('Authorization', adminUser.token)
+
+      expect(response.status).toBe(403)
+      expect(response.body).toHaveProperty('message', "Super Hero or Protection Area can not be empty")
     })
   })
 

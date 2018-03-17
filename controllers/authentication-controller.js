@@ -7,19 +7,16 @@ require('dotenv').config()
 
 /**
  * @class
- * Class responsible for handle athentication events
+ * class responsible for handle athentication events
  */
 class AuthenticationController extends BaseController{
 
    /**
-   * @function
-   * Validates if it's a valid user by username and login 
+   * Validates if it's a valid user by username and password 
    * passed on request
    * 
    * @param req http request
    * @param res http response
-   * 
-   * @returns
    */
   async handleAuthentication (req, res) {
 
@@ -32,6 +29,14 @@ class AuthenticationController extends BaseController{
     user.validatePassword(req.body.password) ? res.status(200).send({token: this.generateToken(user)}) : res.status(403).send({message: 'Invalid password!'})
   }
 
+  /**
+   * gets token no 'Authorization' header
+   * and check if it's valid
+   * 
+   * @param req - http request
+   * @param res - http response
+   * @param next - next middleware function 
+   */
   async handleTokenValidation (req, res, next) {
 
     const decodedToken = this.decodeToken(req.get('Authorization'))
@@ -43,10 +48,20 @@ class AuthenticationController extends BaseController{
     }
   }
 
+  /**
+   * generates a jwt token based with an user id attached to it
+   * 
+   * @param user - requesting user
+   */
   generateToken (user) {
     return sign({user_id: user.id}, process.env.TOKEN_SECRET)
   }
 
+  /**
+   * check if token is valid
+   * 
+   * @param token - jwt token
+   */
   decodeToken (token) {
     let decodedToken = {}
     try {

@@ -61,13 +61,31 @@ describe('User', () => {
       expect(response.body.password).not.toEqual(userPayload.password)
     })
 
-    it('Must return an 403 status and a fulfiled object with an error message  ', async () =>{
+    it('Must return an 403 status and a fulfiled object with an error message when user name already exists', async () =>{
       
       const userPayload = {username: 'Payload', password: 'anything'}
       const response = await request(app).post('/users').send(userPayload).set('Authorization', adminUser.token)
 
       expect(response.status).toBe(403)
       expect(response.body).toHaveProperty('message', "User already exists")
+    })
+
+    it('Must return an 403 status and a fulfiled object with an error message when user name is empty', async () =>{
+      
+      const userPayload = {username: '', password: 'anything', bla: true}
+      const response = await request(app).post('/users').send(userPayload).set('Authorization', adminUser.token)
+
+      expect(response.status).toBe(403)
+      expect(response.body).toHaveProperty('message', "Username or password can not be empty")
+    })
+
+    it('Must return an 403 status and a fulfiled object with an error message when password is empty', async () =>{
+      
+      const userPayload = {username: 'new playload', password: ''}
+      const response = await request(app).post('/users').send(userPayload).set('Authorization', adminUser.token)
+
+      expect(response.status).toBe(403)
+      expect(response.body).toHaveProperty('message', "Username or password can not be empty")
     })
   })
 
@@ -102,7 +120,7 @@ describe('User', () => {
 
     it('Must return an 200 status and a fulfiled object if user is Admin ', async () =>{
 
-      const userPayload = {username: 'user update Payload', password: 'anything', bla: true}
+      const userPayload = {username: 'user update Payload', password: 'anything'}
       const userUpdatePayload = {username: 'Other Payload', password: 'something'}
 
       const userResponse = await request(app).post('/users').send(userPayload).set('Authorization', adminUser.token)
@@ -116,6 +134,44 @@ describe('User', () => {
       expect(response.body.password).not.toEqual(userUpdatePayload.password)
       expect(response.body).not.toHaveProperty('created_at')
       expect(response.body).not.toHaveProperty('updated_at')
+    })
+
+    it('Must return an 403 status and a fulfiled object with an error message ', async () =>{
+
+      const userPayload = {username: 'some user update Payload', password: 'anything'}
+      const anotherUserPayload = {username: 'another user update Payload', password: 'anything'}
+      const userUpdatePayload = {username: 'another user update Payload', password: 'something'}
+
+      await request(app).post('/users').send(anotherUserPayload).set('Authorization', adminUser.token)
+      const userResponse = await request(app).post('/users').send(userPayload).set('Authorization', adminUser.token)
+      const response = await request(app).put(`/users/${userResponse.body.id}`).send(userUpdatePayload).set('Authorization', adminUser.token)
+
+      expect(response.status).toBe(403)
+      expect(response.body).toHaveProperty('message', "User already exists")
+    })
+
+    it('Must return an 403 status and a fulfiled object with an error message when username is empty', async () =>{
+
+      const userPayload = {username: 'not empty user update Payload', password: 'anything'}
+      const userUpdatePayload = {username: '', password: 'something'}
+
+      const userResponse = await request(app).post('/users').send(userPayload).set('Authorization', adminUser.token)
+      const response = await request(app).put(`/users/${userResponse.body.id}`).send(userUpdatePayload).set('Authorization', adminUser.token)
+
+      expect(response.status).toBe(403)
+      expect(response.body).toHaveProperty('message', "Username or password can not be empty")
+    })
+
+    it('Must return an 403 status and a fulfiled object with an error message when password is empty', async () =>{
+
+      const userPayload = {username: 'not empty password', password: 'anything'}
+      const userUpdatePayload = {username: 'not empty password', password: ''}
+
+      const userResponse = await request(app).post('/users').send(userPayload).set('Authorization', adminUser.token)
+      const response = await request(app).put(`/users/${userResponse.body.id}`).send(userUpdatePayload).set('Authorization', adminUser.token)
+
+      expect(response.status).toBe(403)
+      expect(response.body).toHaveProperty('message', "Username or password can not be empty")
     })
   })
 

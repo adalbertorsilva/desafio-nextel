@@ -10,7 +10,8 @@ module.exports = {
       },
       name: {
         type: Sequelize.STRING,
-        unique:true
+        unique:true,
+        allowNull: false
       },
       point: {
         type: Sequelize.GEOMETRY('POINT')

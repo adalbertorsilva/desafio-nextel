@@ -5,7 +5,7 @@ describe('Authentication', () => {
   describe('Test token generation', () => {
     it('Must return a string token', async () =>{
 
-        const user = await User.create()
+        const user = new User()
         const authenticationController = new AuthenticationController()
         const token = authenticationController.generateToken(user)
         expect(token).not.toBeNull()
@@ -19,7 +19,7 @@ describe('Authentication', () => {
     })
 
     it('Must return true when the token not valid', async () =>{
-        const user = await User.create()
+        const user = new User()
         const authenticationController = new AuthenticationController()
         const token = authenticationController.generateToken(user)
         const decodedToken = authenticationController.decodeToken(token)

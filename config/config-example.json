@@ -1,26 +1,26 @@
 {
   "development": {
-    "username": "root",
-    "password": null,
-    "database": "database_development",
+    "username": "<database username>",
+    "password": "<database password>",
+    "database": "hero_development",
     "host": "127.0.0.1",
     "port": 5432,
-    "dialect": "mysql"
+    "dialect": "postgres"
   },
   "test": {
-    "username": "root",
-    "password": null,
-    "database": "database_test",
+    "username": "<database username>",
+    "password": "<database password>",
+    "database": "hero_test",
     "host": "127.0.0.1",
     "port": 5432,
-    "dialect": "mysql"
+    "dialect": "postgres"
   },
   "production": {
-    "username": "root",
-    "password": null,
-    "database": "database_production",
+    "username": "<database username>",
+    "password": "<database password>",
+    "database": "hero_production",
     "host": "127.0.0.1",
     "port": 5432,
-    "dialect": "mysql"
+    "dialect": "postgres"
   }
 }
