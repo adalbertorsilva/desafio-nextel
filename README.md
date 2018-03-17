@@ -43,7 +43,7 @@ cd nextel-challenge/
 ```
 (there is a config-example.json in this project to help with any trouble)
 
-- Inside your terminal run the command to build the application
+- Inside your terminal, run the command to build the application
 
 ```
 npm run build
@@ -67,7 +67,7 @@ npm test
 
 ### Test Coverage
 
-- After each test running it will show up a succinct coverage summary.
+- After each test running, it will show up a succinct coverage summary.
 
 ```
 =============================== Coverage summary ===============================
@@ -77,5 +77,5 @@ Functions    : 100% ( 94/94 )
 Lines        : 99.69% ( 317/318 )
 ================================================================================
 ```
-- If you want to see a more detailed report, after each test execution a **coverage folder** is created / updated and inside of it there is an **index.html** file that has more detailed apresentation
+- If you want to see a more detailed report, after each test execution a **coverage folder** is created / updated and inside of it there is an **index.html** file that may show a more detailed apresentation on your browser
 
